@@ -1,0 +1,119 @@
+{
+  "subject": {
+    "value": "{{subject}}"
+  },
+  "action": {
+    "value": "{{action}}"
+  },
+  "headline": {
+    "value": "{{headline}}"
+  },
+  "subheadline": {
+    "value": "{{subheadline}}"
+  },
+  "feature_items": [
+    {
+      "title": "{{feature_1_title}}",
+      "description": "{{feature_1_description}}"
+    },
+    {
+      "title": "{{feature_2_title}}",
+      "description": "{{feature_2_description}}"
+    },
+    {
+      "title": "{{feature_3_title}}",
+      "description": "{{feature_3_description}}"
+    }
+  ],
+  "style": {
+    "value": "{{style}}"
+  },
+  "branding": {
+    "brand_name": "Apple The Exchange TRX",
+    "brand_identity": "{{brand_identity}}",
+    "visual_identity": "{{visual_identity}}",
+    "logo": {
+      "url": "{{logo_url}}",
+      "position": "top_left",
+      "visibility": true
+    }
+  },
+  "typography": {
+    "font_family": "{{font_family}}",
+    "font_style": "{{font_style}}",
+    "headline": {
+      "size": "{{headline_size}}",
+      "weight": "{{headline_weight}}",
+      "color": "{{headline_color}}",
+      "alignment": "{{headline_alignment}}",
+      "letter_spacing": "{{headline_letter_spacing}}"
+    },
+    "subheadline": {
+      "size": "{{subheadline_size}}",
+      "weight": "{{subheadline_weight}}",
+      "color": "{{subheadline_color}}",
+      "alignment": "{{subheadline_alignment}}",
+      "letter_spacing": "{{subheadline_letter_spacing}}"
+    },
+    "features": {
+      "title": {
+        "size": "{{feature_title_size}}",
+        "weight": "{{feature_title_weight}}",
+        "color": "{{feature_title_color}}"
+      },
+      "description": {
+        "size": "{{feature_description_size}}",
+        "weight": "{{feature_description_weight}}",
+        "color": "{{feature_description_color}}"
+      },
+      "alignment": "{{feature_alignment}}"
+    },
+    "hierarchy": "{{typography_hierarchy}}"
+  },
+  "composition": {
+    "layout": "{{layout}}",
+    "product_position": "{{product_position}}",
+    "product_scale": "{{product_scale}}",
+    "text_position": {
+      "headline": "{{headline_position}}",
+      "subheadline": "{{subheadline_position}}",
+      "features": "{{features_position}}"
+    },
+    "visual_hierarchy": [
+      "{{hierarchy_1}}",
+      "{{hierarchy_2}}",
+      "{{hierarchy_3}}",
+      "{{hierarchy_4}}"
+    ],
+    "spacing": "{{spacing}}",
+    "balance": "{{balance}}",
+    "negative_space": "{{negative_space}}",
+    "perspective": "{{perspective}}"
+  },
+  "background": {
+    "value": "{{background}}"
+  },
+  "lighting": {
+    "type": "{{lighting_type}}",
+    "direction": "{{lighting_direction}}",
+    "intensity": "{{lighting_intensity}}",
+    "shadows": "{{lighting_shadows}}",
+    "reflections": "{{lighting_reflections}}"
+  },
+  "color_palette": {
+    "primary": "{{primary_color}}",
+    "secondary": "{{secondary_color}}",
+    "accent": "{{accent_color}}",
+    "mood": "{{color_mood}}"
+  },
+  "quality": {
+    "resolution": "{{resolution}}",
+    "realism": "{{realism}}",
+    "detail": "{{detail}}",
+    "rendering": "{{rendering}}",
+    "sharpness": "{{sharpness}}"
+  },
+  "ratio": {
+    "value": "4:5"
+  }
+}
