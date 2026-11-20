@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio Gambar AI - Generator & Editor Gambar</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #09090b;
+            color: #f4f4f5;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #18181b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3f3f46;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #52525b;
+        }
+        .glass-panel {
+            background: rgba(24, 24, 27, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+        .animate-glow {
+            animation: pulse-glow 3s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-brand-500 selection:text-white">
+
+    <!-- Header / Navbar -->
+    <header class="sticky top-0 z-40 glass-panel border-b border-zinc-800 px-4 sm:px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-brand-500/20">
+                    <i data-lucide="sparkles" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold tracking-tight text-white">Studio Gambar AI</h1>
+                    <p class="text-xs text-zinc-400 hidden sm:block">Ditenagai oleh Gemini 3.1 Flash Image</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button id="btnResetSession" class="hidden items-center gap-2 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition-colors border border-zinc-700" title="Mulai Gambar Baru">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    <span>Gambar Baru</span>
+                </button>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-brand-500/10 text-brand-400 border border-brand-500/20">
+                    <span class="w-2 h-2 rounded-full bg-brand-400 animate-pulse"></span>
+                    Siap Berkreasi
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Notification Banner (Pengganti alert) -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full px-4 sm:px-0 pointer-events-none"></div>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
+        
+        <!-- Left Panel: Controls & Prompt -->
+        <div class="lg:col-span-5 flex flex-col gap-6">
+            
+            <!-- Mode Indicator -->
+            <div id="editModeBanner" class="hidden rounded-2xl bg-indigo-500/10 border border-indigo-500/30 p-4 flex items-start gap-3">
+                <i data-lucide="wand-2" class="w-5 h-5 text-indigo-400 shrink-0 mt-0.5"></i>
+                <div class="flex-1 text-sm">
+                    <p class="font-semibold text-indigo-300">Mode Edit Aktif</p>
+                    <p class="text-indigo-200/70 text-xs mt-0.5">Prompt Anda berikutnya akan memodifikasi gambar yang sedang tampil di kanvas.</p>
+                </div>
+                <button id="btnCancelEdit" class="text-xs text-indigo-300 hover:text-white underline">Batal</button>
+            </div>
+
+            <!-- Prompt Input Card -->
+            <div class="glass-panel rounded-2xl p-5 shadow-xl flex flex-col gap-5">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label for="promptInput" class="text-sm font-semibold text-zinc-200 flex items-center gap-2">
+                            <i data-lucide="pen-tool" class="w-4 h-4 text-brand-400"></i>
+                            <span id="promptLabel">Deskripsi Gambar (Prompt)</span>
+                        </label>
+                        <span class="text-[11px] font-medium px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-400 border border-zinc-700/80">Rasio 4:5</span>
+                    </div>
+                    <textarea 
+                        id="promptInput" 
+                        rows="8" 
+                        class="w-full rounded-xl bg-zinc-900/90 border border-zinc-700/80 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 text-xs sm:text-sm font-mono text-zinc-100 placeholder-zinc-500 p-3.5 transition-all resize-y"
+                        placeholder="Masukkan deskripsi gambar atau tempel struktur JSON prompt di sini..."
+                    >{
+  "subject": "Apple Watch Series 10",
+  "headline": "THIN. LIGHT. POWERFUL.",
+  "subheadline": "A healthier, more active you starts here.",
+  "feature_items": [
+    {
+      "title": "Thinner Design",
+      "description": "Remarkably thin and lightweight."
+    },
+    {
+      "title": "Advanced Health",
+      "description": "Powerful health insights at a glance."
+    },
+    {
+      "title": "Fast Charging",
+      "description": "More power in less time."
+    }
+  ],
+  "background": "Clean White Premium",
+  "composition": "Hero Product Center with Floating Features",
+  "quality": "Ultra Premium Commercial Photography, 8K",
+  "ratio": "4:5"
+} Create a premium Apple product advertising visual for Apple The Exchange TRX, Malaysia. Preserve authentic Apple industrial design, clean typography, refined shadows, realistic reflections, generous negative space, legible text, no watermarks or clutter.</textarea>
+                </div>
+
+                <!-- Generate Button -->
+                <button 
+                    id="btnGenerate" 
+                    class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-semibold text-sm shadow-lg shadow-brand-500/25 flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    <i data-lucide="sparkles" class="w-4 h-4"></i>
+                    <span id="btnGenerateText">Buat Gambar</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Panel: Canvas & Gallery -->
+        <div class="lg:col-span-7 flex flex-col gap-6">
+            
+            <!-- Main Viewport Canvas -->
+            <div class="glass-panel rounded-2xl p-4 sm:p-6 flex flex-col items-center justify-center min-h-[380px] sm:min-h-[480px] relative overflow-hidden border border-zinc-800">
+                
+                <!-- Empty State -->
+                <div id="emptyState" class="flex flex-col items-center text-center max-w-md px-4 py-8">
+                    <div class="w-16 h-16 rounded-2xl bg-zinc-800/80 border border-zinc-700 flex items-center justify-center mb-4 text-zinc-400">
+                        <i data-lucide="image" class="w-8 h-8"></i>
+                    </div>
+                    <h2 class="text-base sm:text-lg font-semibold text-zinc-200">Kanvas Masih Kosong</h2>
+                    <p class="text-xs sm:text-sm text-zinc-400 mt-1.5 leading-relaxed">
+                        Ketik deskripsi gambar di panel sebelah kiri, pilih gaya visual dan rasio aspek, lalu klik <strong>Buat Gambar</strong> untuk mulai berkreasi.
+                    </p>
+                </div>
+
+                <!-- Loading State -->
+                <div id="loadingState" class="hidden flex-col items-center justify-center text-center p-8 z-10">
+                    <div class="relative w-20 h-20 flex items-center justify-center mb-5">
+                        <div class="absolute inset-0 rounded-full bg-brand-500/20 animate-ping"></div>
+                        <div class="absolute inset-2 rounded-full bg-indigo-500/20 animate-glow"></div>
+                        <div class="w-14 h-14 rounded-2xl bg-zinc-900 border border-brand-500/40 flex items-center justify-center shadow-xl">
+                            <i data-lucide="loader-2" class="w-7 h-7 text-brand-400 animate-spin"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-base font-semibold text-white">Sedang Melukis Imajinasi Anda...</h3>
+                    <p class="text-xs text-zinc-400 mt-1 max-w-xs">AI sedang memproses detail pencahayaan, komposisi, dan tekstur gambar.</p>
+                </div>
+
+                <!-- Result Image Container -->
+                <div id="resultContainer" class="hidden w-full flex-col items-center gap-4">
+                    <div class="relative group w-full flex items-center justify-center bg-zinc-950/60 rounded-xl overflow-hidden border border-zinc-800/80">
+                        <img id="generatedImage" src="" alt="Hasil Gambar AI" class="max-h-[520px] w-auto object-contain rounded-lg transition-transform duration-300">
+                    </div>
+                    
+                    <!-- Action Toolbar -->
+                    <div class="w-full flex flex-wrap items-center justify-between gap-3 pt-2">
+                        <div class="flex items-center gap-2">
+                            <button id="btnEditCurrent" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 flex items-center gap-2 transition-colors">
+                                <i data-lucide="wand-2" class="w-4 h-4"></i>
+                                Edit Gambar Ini
+                            </button>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button id="btnCopyPrompt" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 flex items-center gap-1.5 transition-colors" title="Salin Prompt">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                                <span class="hidden sm:inline">Salin Prompt</span>
+                            </button>
+                            <button id="btnDownload" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-brand-600 hover:bg-brand-500 text-white shadow-md shadow-brand-500/20 flex items-center gap-2 transition-colors">
+                                <i data-lucide="download" class="w-4 h-4"></i>
+                                Unduh PNG
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History Gallery -->
+            <div id="historySection" class="hidden flex-col gap-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-semibold text-zinc-300 flex items-center gap-2">
+                        <i data-lucide="history" class="w-4 h-4 text-zinc-400"></i>
+                        Riwayat Kreasi Sesi Ini
+                    </h3>
+                    <span id="historyCount" class="text-xs text-zinc-500">0 gambar</span>
+                </div>
+                <div id="historyGrid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                    <!-- Thumbnail items injected here -->
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // Inisialisasi ikon Lucide
+        lucide.createIcons();
+
+        // State Aplikasi
+        const state = {
+            selectedRatio: '4:5',
+            isGenerating: false,
+            isEditMode: false,
+            currentImageUrl: null,
+            currentPrompt: '',
+            chatHistory: [], // Menyimpan riwayat percakapan untuk multi-turn editing
+            gallery: []
+        };
+
+        // Referensi Elemen DOM
+        const els = {
+            promptInput: document.getElementById('promptInput'),
+            promptLabel: document.getElementById('promptLabel'),
+            btnGenerate: document.getElementById('btnGenerate'),
+            btnGenerateText: document.getElementById('btnGenerateText'),
+            emptyState: document.getElementById('emptyState'),
+            loadingState: document.getElementById('loadingState'),
+            resultContainer: document.getElementById('resultContainer'),
+            generatedImage: document.getElementById('generatedImage'),
+            btnDownload: document.getElementById('btnDownload'),
+            btnCopyPrompt: document.getElementById('btnCopyPrompt'),
+            btnEditCurrent: document.getElementById('btnEditCurrent'),
+            editModeBanner: document.getElementById('editModeBanner'),
+            btnCancelEdit: document.getElementById('btnCancelEdit'),
+            btnResetSession: document.getElementById('btnResetSession'),
+            historySection: document.getElementById('historySection'),
+            historyGrid: document.getElementById('historyGrid'),
+            historyCount: document.getElementById('historyCount')
+        };
+
+        // Fungsi Notifikasi Toast (Menggantikan alert)
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            const colors = {
+                info: 'bg-zinc-800 border-zinc-700 text-zinc-100',
+                success: 'bg-emerald-950/90 border-emerald-700/60 text-emerald-200',
+                error: 'bg-red-950/90 border-red-700/60 text-red-200'
+            };
+            
+            const icons = {
+                info: 'info',
+                success: 'check-circle-2',
+                error: 'alert-circle'
+            };
+
+            toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl border shadow-xl backdrop-blur-md text-xs sm:text-sm transition-all duration-300 transform translate-y-2 opacity-0 ${colors[type]}`;
+            toast.innerHTML = `
+                <i data-lucide="${icons[type]}" class="w-4 h-4 shrink-0"></i>
+                <span class="flex-1">${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            lucide.createIcons({ root: toast });
+
+            // Animasi masuk
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+
+            // Hapus otomatis setelah 4 detik
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // Kontrol Mode Edit Multi-turn
+        els.btnEditCurrent.addEventListener('click', () => {
+            if (!state.currentImageUrl || state.chatHistory.length === 0) return;
+            state.isEditMode = true;
+            els.editModeBanner.classList.remove('hidden');
+            els.promptLabel.textContent = 'Instruksi Perubahan Gambar';
+            els.promptInput.value = '';
+            els.promptInput.placeholder = 'Contoh: Tambahkan kacamata hitam pada karakter, ubah langit menjadi malam hari...';
+            els.btnGenerateText.textContent = 'Terapkan Perubahan';
+            els.promptInput.focus();
+        });
+
+        els.btnCancelEdit.addEventListener('click', exitEditMode);
+
+        function exitEditMode() {
+            state.isEditMode = false;
+            els.editModeBanner.classList.add('hidden');
+            els.promptLabel.textContent = 'Deskripsi Gambar (Prompt)';
+            els.promptInput.placeholder = 'Contoh: Seekor kucing astronot mengambang di luar angkasa dengan latar belakang nebula warna-warni...';
+            els.btnGenerateText.textContent = 'Buat Gambar';
+        }
+
+        els.btnResetSession.addEventListener('click', () => {
+            exitEditMode();
+            state.chatHistory = [];
+            els.promptInput.value = '';
+            els.btnResetSession.classList.add('hidden');
+            els.btnResetSession.classList.remove('flex');
+            showToast('Siap membuat gambar baru dari awal.', 'info');
+        });
+
+        // Fungsi Panggilan API Gemini dengan Exponential Backoff
+        async function fetchWithRetry(url, options, maxRetries = 4) {
+            let delay = 1000;
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok) {
+                        const errData = await response.json().catch(() => ({}));
+                        throw new Error(errData?.error?.message || `HTTP error! status: ${response.status}`);
+                    }
+                    return await response.json();
+                } catch (error) {
+                    if (i === maxRetries - 1) throw error;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
+                }
+            }
+        }
+
+        // Proses Utama Pembuatan Gambar
+        els.btnGenerate.addEventListener('click', generateImage);
+        els.promptInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                generateImage();
+            }
+        });
+
+        async function generateImage() {
+            const rawPrompt = els.promptInput.value.trim();
+            if (!rawPrompt) {
+                showToast('Silakan masukkan deskripsi gambar terlebih dahulu.', 'error');
+                els.promptInput.focus();
+                return;
+            }
+
+            if (state.isGenerating) return;
+
+            // Update UI ke status Loading
+            state.isGenerating = true;
+            els.btnGenerate.disabled = true;
+            els.btnGenerateText.textContent = 'Memproses...';
+            els.emptyState.classList.add('hidden');
+            els.resultContainer.classList.add('hidden');
+            els.loadingState.classList.remove('hidden');
+            els.loadingState.classList.add('flex');
+
+            // Parse jika input mengandung blok JSON terstruktur agar instruksi ke model maksimal
+            let fullPrompt = rawPrompt;
+            let targetRatio = state.selectedRatio;
+
+            try {
+                const jsonMatch = rawPrompt.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    const parsed = JSON.parse(jsonMatch[0]);
+                    const extraInstruction = rawPrompt.replace(jsonMatch[0], '').trim();
+                    
+                    if (parsed.ratio) {
+                        targetRatio = parsed.ratio;
+                    }
+
+                    const featuresText = Array.isArray(parsed.feature_items)
+                        ? parsed.feature_items.map((f, idx) => `${idx + 1}. "${f.title}" - "${f.description}"`).join('; ')
+                        : '';
+
+                    fullPrompt = [
+                        parsed.subject ? `Subject: ${parsed.subject} as the central hero product with authentic industrial design, realistic materials, and reflections.` : '',
+                        parsed.headline ? `Headline text prominently displayed in clean, bold, elegant sans-serif typography: "${parsed.headline}".` : '',
+                        parsed.subheadline ? `Subheadline text positioned directly below the headline with balanced spacing: "${parsed.subheadline}".` : '',
+                        featuresText ? `Display 3 clean floating feature callouts with clear visual hierarchy: ${featuresText}.` : '',
+                        parsed.background ? `Background: ${parsed.background} with subtle depth, soft studio lighting, and generous negative space.` : '',
+                        parsed.composition ? `Composition: ${parsed.composition}.` : '',
+                        parsed.quality ? `Style and Quality: ${parsed.quality}.` : '',
+                        extraInstruction ? `Additional Art Direction: ${extraInstruction}` : ''
+                    ].filter(Boolean).join(' ');
+                }
+            } catch (e) {
+                // Gunakan rawPrompt apa adanya jika bukan format JSON valid
+                fullPrompt = rawPrompt;
+            }
+
+            const apiKey = ""; // Disediakan otomatis oleh runtime
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`;
+
+            let contentsPayload = [];
+
+            if (state.isEditMode && state.chatHistory.length > 0) {
+                // Multi-turn editing berdasarkan gambar sebelumnya
+                contentsPayload = [
+                    ...state.chatHistory,
+                    {
+                        role: 'user',
+                        parts: [{ text: fullPrompt }]
+                    }
+                ];
+            } else {
+                // Text-to-Image standar
+                contentsPayload = [
+                    {
+                        role: 'user',
+                        parts: [{ text: fullPrompt }]
+                    }
+                ];
+            }
+
+            const payload = {
+                contents: contentsPayload,
+                generationConfig: {
+                    responseModalities: ['IMAGE'],
+                    imageConfig: {
+                        aspectRatio: targetRatio
+                    }
+                }
+            };
+
+            try {
+                const result = await fetchWithRetry(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const candidate = result?.candidates?.[0];
+                const imagePart = candidate?.content?.parts?.find(p => p.inlineData);
+
+                if (!imagePart || !imagePart.inlineData?.data) {
+                    throw new Error('Model tidak mengembalikan data gambar. Coba ubah deskripsi Anda.');
+                }
+
+                const mimeType = imagePart.inlineData.mimeType || 'image/png';
+                const imageUrl = `data:${mimeType};base64,${imagePart.inlineData.data}`;
+
+                // Simpan riwayat percakapan untuk mendukung edit lanjutan
+                state.chatHistory = [
+                    ...contentsPayload,
+                    candidate.content
+                ];
+
+                state.currentImageUrl = imageUrl;
+                state.currentPrompt = fullPrompt;
+
+                // Tampilkan gambar hasil
+                els.generatedImage.src = imageUrl;
+                els.loadingState.classList.add('hidden');
+                els.loadingState.classList.remove('flex');
+                els.resultContainer.classList.remove('hidden');
+                els.resultContainer.classList.add('flex');
+
+                // Tampilkan tombol reset sesi
+                els.btnResetSession.classList.remove('hidden');
+                els.btnResetSession.classList.add('flex');
+
+                // Tambahkan ke galeri riwayat
+                addToHistory(imageUrl, fullPrompt, [...state.chatHistory]);
+                showToast(state.isEditMode ? 'Gambar berhasil diperbarui!' : 'Gambar berhasil dibuat!', 'success');
+
+                // Keluar dari mode edit setelah selesai menerapkan perubahan
+                if (state.isEditMode) {
+                    exitEditMode();
+                }
+
+            } catch (error) {
+                console.error('Error generating image:', error);
+                els.loadingState.classList.add('hidden');
+                els.loadingState.classList.remove('flex');
+                
+                if (state.currentImageUrl) {
+                    els.resultContainer.classList.remove('hidden');
+                    els.resultContainer.classList.add('flex');
+                } else {
+                    els.emptyState.classList.remove('hidden');
+                }
+                
+                showToast(`Gagal membuat gambar: ${error.message}`, 'error');
+            } finally {
+                state.isGenerating = false;
+                els.btnGenerate.disabled = false;
+                els.btnGenerateText.textContent = state.isEditMode ? 'Terapkan Perubahan' : 'Buat Gambar';
+            }
+        }
+
+        // Menambahkan Hasil ke Galeri Riwayat
+        function addToHistory(imageUrl, prompt, historySnapshot) {
+            state.gallery.unshift({
+                id: Date.now(),
+                imageUrl,
+                prompt,
+                historySnapshot
+            });
+
+            els.historySection.classList.remove('hidden');
+            els.historySection.classList.add('flex');
+            els.historyCount.textContent = `${state.gallery.length} gambar`;
+
+            renderHistoryGrid();
+        }
+
+        function renderHistoryGrid() {
+            els.historyGrid.innerHTML = '';
+            state.gallery.forEach((item) => {
+                const div = document.createElement('div');
+                div.className = 'group relative aspect-square rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 hover:border-brand-500 cursor-pointer transition-all';
+                div.innerHTML = `
+                    <img src="${item.imageUrl}" alt="Thumbnail" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-2 flex items-end">
+                        <p class="text-[10px] text-zinc-200 line-clamp-2 leading-tight">${item.prompt}</p>
+                    </div>
+                `;
+                div.addEventListener('click', () => {
+                    state.currentImageUrl = item.imageUrl;
+                    state.currentPrompt = item.prompt;
+                    state.chatHistory = item.historySnapshot;
+                    els.generatedImage.src = item.imageUrl;
+                    els.emptyState.classList.add('hidden');
+                    els.resultContainer.classList.remove('hidden');
+                    els.resultContainer.classList.add('flex');
+                    exitEditMode();
+                });
+                els.historyGrid.appendChild(div);
+            });
+        }
+
+        // Tombol Unduh Gambar
+        els.btnDownload.addEventListener('click', () => {
+            if (!state.currentImageUrl) return;
+            const link = document.createElement('a');
+            link.href = state.currentImageUrl;
+            link.download = `ai-studio-${Date.now()}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('Mengunduh gambar...', 'success');
+        });
+
+        // Tombol Salin Prompt (menggunakan execCommand sesuai standar kompatibilitas)
+        els.btnCopyPrompt.addEventListener('click', () => {
+            if (!state.currentPrompt) return;
+            const tempInput = document.createElement('textarea');
+            tempInput.value = state.currentPrompt;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            try {
+                document.execCommand('copy');
+                showToast('Prompt berhasil disalin ke papan klip!', 'success');
+            } catch (err) {
+                showToast('Gagal menyalin prompt.', 'error');
+            }
+            document.body.removeChild(tempInput);
+        });
+    </script>
+</body>
+</html>
