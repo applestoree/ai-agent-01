@@ -821,6 +821,9 @@ Generate one polished, high-end commercial advertising image. Maintain visual co
      * Validate required inputs before image generation
      */
     function validateInputs(values) {
+      if (!contentTypes.includes(values.content_type)) {
+        return { valid: false, message: "Content Type belum tersedia. Periksa koneksi ke content_type.json.", focusEl: els.contentTypeSelect };
+      }
       if (!values.subject_type) {
         return { valid: false, message: "Subject Type belum tersedia. Periksa koneksi ke subject_types.json.", focusEl: els.subjectTypeSelect };
       }
