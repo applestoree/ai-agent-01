@@ -317,7 +317,7 @@
               </div>
             </div>
 
-            <!-- RENDER CONTROLS: QUALITY & IMAGE RATIO -->
+            <!-- RENDER CONTROLS: QUALITY -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <!-- QUALITY -->
               <div>
@@ -339,24 +339,6 @@
                 </select>
               </div>
 
-              <!-- IMAGE RATIO -->
-              <div>
-                <div class="flex items-center justify-between mb-1.5">
-                  <label for="ratioSelect" class="block text-xs font-semibold uppercase tracking-wider text-[#1D1D1F]">
-                    Image Ratio
-                  </label>
-                  <span class="text-[11px] font-mono text-[#86868B]">{{ratio}}</span>
-                </div>
-                <select
-                  id="ratioSelect"
-                  class="apple-input w-full rounded-2xl border border-[#D2D2D7] bg-[#FBFBFD] px-4 py-3 text-sm text-[#1D1D1F]"
-                >
-                  <option value="4:5" selected>4:5 Portrait (Default)</option>
-                  <option value="1:1">1:1 Square</option>
-                  <option value="9:16">9:16 Story</option>
-                  <option value="16:9">16:9 Landscape</option>
-                </select>
-              </div>
             </div>
 
             <!-- PRIMARY ACTION BAR -->
@@ -586,13 +568,15 @@
       background: "Clean White Premium",
       customBackground: "",
       composition: "Center Hero — produk berada di tengah.",
-      quality: "Premium Commercial Photography",
-      ratio: "4:5"
+      quality: "Premium Commercial Photography"
     };
+
+    // Fixed image output ratio: 4:5 portrait only
+    const IMAGE_RATIO = "4:5";
 
     // Application Runtime State
     let lastGeneratedPrompt = "";
-    let lastGeneratedRatio = "4:5";
+    let lastGeneratedRatio = IMAGE_RATIO;
     let currentImageDataUrl = null;
     let isGenerating = false;
 
@@ -613,7 +597,6 @@
       customBgInput: document.getElementById("customBackgroundInput"),
       compositionSelect: document.getElementById("compositionSelect"),
       qualitySelect: document.getElementById("qualitySelect"),
-      ratioSelect: document.getElementById("ratioSelect"),
       finalPromptOutput: document.getElementById("finalPromptOutput"),
       generateBtn: document.getElementById("generateImageBtn"),
       generateBtnText: document.getElementById("generateBtnText"),
@@ -689,8 +672,7 @@
         ],
         background: resolvedBackground,
         composition: els.compositionSelect.value,
-        quality: els.qualitySelect.value,
-        ratio: els.ratioSelect.value
+        quality: els.qualitySelect.value
       };
     }
 
@@ -729,8 +711,7 @@ QUALITY
 ${values.quality}
 Photorealistic materials, precise product details, refined shadows, realistic reflections, professional commercial art direction.
 IMAGE RATIO
-${values.ratio}
-Default: 4:5 portrait.
+4:5 portrait (fixed; not user-selectable).
 FINAL INSTRUCTION
 Generate one polished, high-end commercial advertising image. Maintain visual consistency, clean spacing, legible typography, and premium Apple-inspired art direction. Avoid clutter, distorted products, incorrect text, watermarks, and unnecessary decorative elements.`;
     }
@@ -743,7 +724,7 @@ Generate one polished, high-end commercial advertising image. Maintain visual co
       const prompt = buildStructuredPrompt(values);
       els.finalPromptOutput.textContent = prompt;
       els.modalPromptText.textContent = prompt;
-      els.resultRatioBadge.textContent = values.ratio;
+      els.resultRatioBadge.textContent = IMAGE_RATIO;
     }
 
     /**
@@ -957,9 +938,9 @@ STRICT RULES:
           return;
         }
         promptToRun = buildStructuredPrompt(values);
-        ratioToRun = values.ratio;
+        ratioToRun = IMAGE_RATIO;
         lastGeneratedPrompt = promptToRun;
-        lastGeneratedRatio = ratioToRun;
+        lastGeneratedRatio = IMAGE_RATIO;
       }
 
       isGenerating = true;
@@ -1108,10 +1089,9 @@ STRICT RULES:
 
       els.compositionSelect.value = DEFAULT_STATE.composition;
       els.qualitySelect.value = DEFAULT_STATE.quality;
-      els.ratioSelect.value = DEFAULT_STATE.ratio;
 
       lastGeneratedPrompt = "";
-      lastGeneratedRatio = DEFAULT_STATE.ratio;
+      lastGeneratedRatio = IMAGE_RATIO;
       currentImageDataUrl = null;
       els.generateAgainBtn.disabled = true;
       els.downloadImageBtn.disabled = true;
@@ -1133,7 +1113,7 @@ STRICT RULES:
         els.subject, els.headline, els.subheadline,
         els.f1Title, els.f1Desc, els.f2Title, els.f2Desc, els.f3Title, els.f3Desc,
         els.backgroundSelect, els.customBgInput,
-        els.compositionSelect, els.qualitySelect, els.ratioSelect
+        els.compositionSelect, els.qualitySelect
       ];
 
       liveInputs.forEach(input => {
