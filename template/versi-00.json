@@ -1,0 +1,37 @@
+{
+  "subject": {
+    "value": "{{subject}}"
+  },
+  "headline": {
+    "value": "{{headline}}"
+  },
+  "subheadline": {
+    "value": "{{subheadline}}"
+  },
+  "feature_items": [
+    {
+      "title": "{{feature_1_title}}",
+      "description": "{{feature_1_description}}"
+    },
+    {
+      "title": "{{feature_2_title}}",
+      "description": "{{feature_2_description}}"
+    },
+    {
+      "title": "{{feature_3_title}}",
+      "description": "{{feature_3_description}}"
+    }
+  ],
+  "background": {
+    "value": "{{background}}"
+  },
+  "composition": {
+    "value": "{{composition}}"
+  },
+  "quality": {
+    "value": "{{quality}}"
+  },
+  "ratio": {
+    "value": "4:5"
+  }
+}
