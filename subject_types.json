@@ -1,0 +1,44 @@
+{
+  "subject_types": [
+    {
+      "id": "single_product",
+      "name": "Single Product",
+      "description": "Satu produk sebagai fokus utama."
+    },
+    {
+      "id": "product_collection",
+      "name": "Product Collection",
+      "description": "Beberapa varian dari produk yang sama."
+    },
+    {
+      "id": "apple_ecosystem",
+      "name": "Apple Ecosystem",
+      "description": "Kombinasi berbagai kategori perangkat Apple."
+    },
+    {
+      "id": "lifestyle",
+      "name": "Lifestyle",
+      "description": "Produk dalam situasi penggunaan sehari-hari."
+    },
+    {
+      "id": "product_detail",
+      "name": "Product Detail",
+      "description": "Fokus pada detail fisik, material, dan fitur produk."
+    },
+    {
+      "id": "product_comparison",
+      "name": "Product Comparison",
+      "description": "Dua atau lebih produk untuk perbandingan."
+    },
+    {
+      "id": "product_bundle",
+      "name": "Product Bundle",
+      "description": "Produk utama dengan aksesori atau produk pelengkap."
+    },
+    {
+      "id": "campaign_subject",
+      "name": "Campaign Subject",
+      "description": "Produk atau kombinasi produk untuk kampanye promosi tertentu."
+    }
+  ]
+}
