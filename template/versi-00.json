@@ -2,6 +2,9 @@
   "subject": {
     "value": "{{subject}}"
   },
+  "action": {
+    "value": "{{action}}"
+  },
   "headline": {
     "value": "{{headline}}"
   },
@@ -22,11 +25,20 @@
       "description": "{{feature_3_description}}"
     }
   ],
+  "style": {
+    "value": "{{style}}"
+  },
   "background": {
     "value": "{{background}}"
   },
   "composition": {
     "value": "{{composition}}"
+  },
+  "lighting": {
+    "value": "{{lighting}}"
+  },
+  "color_palette": {
+    "value": "{{color_palette}}"
   },
   "quality": {
     "value": "{{quality}}"
