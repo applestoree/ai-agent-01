@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apple AI Image Generator — Apple The Exchange TRX</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+          },
+          colors: {
+            apple: {
+              bg: '#FBFBFD',
+              card: '#FFFFFF',
+              text: '#1D1D1F',
+              secondary: '#86868B',
+              border: '#D2D2D7',
+              blue: '#0071E3',
+              blueHover: '#0077ED',
+              surface: '#F5F5F7'
+            }
+          },
+          boxShadow: {
+            'apple-sm': '0 2px 8px rgba(0, 0, 0, 0.04)',
+            'apple-md': '0 8px 24px rgba(0, 0, 0, 0.06)',
+            'apple-lg': '0 16px 40px rgba(0, 0, 0, 0.08)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #FBFBFD;
+      color: #1D1D1F;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #D2D2D7;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #86868B;
+    }
+    .apple-input {
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .apple-input:focus {
+      outline: none;
+      border-color: #0071E3;
+      box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Toast Notification (Replaces alert()) -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full px-4 sm:px-0"></div>
+
+  <!-- HEADER -->
+  <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3.5">
+        <!-- Minimalist Apple-inspired Retail Emblem -->
+        <div class="w-10 h-10 rounded-2xl bg-[#1D1D1F] text-white flex items-center justify-center shadow-apple-sm shrink-0">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.96 6.32c.67-.81 1.12-1.94.99-3.07-.96.04-2.13.64-2.82 1.45-.61.7-.14 1.86-1.01 2.96 1.07.08 2.17-.53 2.84-1.34z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="text-base sm:text-lg font-semibold tracking-tight text-[#1D1D1F]">Apple AI Image Generator</h1>
+            <span class="hidden sm:inline-block text-gray-300">|</span>
+            <span class="text-xs font-medium px-2.5 py-0.5 rounded-full bg-[#F5F5F7] text-[#1D1D1F] border border-gray-200/80">
+              Apple The Exchange TRX
+            </span>
+          </div>
+          <p class="text-xs sm:text-sm text-[#86868B] font-normal">Premium Advertising Studio</p>
+        </div>
+      </div>
+
+      <!-- Quick Status Pill -->
+      <div class="hidden md:flex items-center gap-2 text-xs text-[#86868B] bg-[#F5F5F7] px-3 py-1.5 rounded-full border border-gray-200/60">
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <span>Structured Prompt Engine Active</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+
+      <!-- LEFT COLUMN: INPUT SECTION (7 cols on lg) -->
+      <section id="inputSection" class="lg:col-span-7 space-y-6">
+        <div class="bg-white rounded-3xl border border-gray-200/80 shadow-apple-sm p-5 sm:p-8">
+          <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-6">
+            <div>
+              <h2 class="text-lg font-semibold tracking-tight text-[#1D1D1F]">Advertising Creative Brief</h2>
+              <p class="text-xs sm:text-sm text-[#86868B] mt-0.5">Konfigurasikan variabel visual untuk kampanye Apple The Exchange TRX.</p>
+            </div>
+            <button type="button" id="resetFormTopBtn" class="text-xs font-medium text-[#86868B] hover:text-[#1D1D1F] px-3 py-1.5 rounded-full hover:bg-[#F5F5F7] transition">
+              Reset Default
+            </button>
+          </div>
+
+          <form id="promptForm" class="space-y-6" novalidate>
+            <!-- SUBJECT -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label for="subject" class="block text-xs font-semibold uppercase tracking-wider text-[#1D1D1F]">
+                  Subject <span class="text-red-500">*</span>
+                </label>
+                <span class="text-[11px] font-mono text-[#86868B]">{{subject}}</span>
+              </div>
+              <textarea
+                id="subject"
+                rows="3"
+                required
+                placeholder="Contoh: iPhone 16 Pro Max in Desert Titanium finish, angled slightly to showcase the Grade 5 titanium frame, triple-lens Pro camera system, and ultra-thin borders."
+                class="apple-input w-full rounded-2xl border border-[#D2D2D7] bg-[#FBFBFD] px-4 py-3 text-sm text-[#1D1D1F] placeholder-[#86868B]/70"
+              ></textarea>
+              <p class="text-xs text-[#86868B] mt-1.5">Menentukan produk Apple utama dengan mempertahankan desain industri, proporsi, dan material asli.</p>
+            </div>
+
+            <!-- HEADLINE & SUBHEADLINE -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label for="headline" class="block text-xs font-semibold uppercase tracking-wider text-[#1D1D1F]">
+                    Headline <span class="text-red-500">*</span>
+                  </label>
+                  <span class="text-[11px] font-mono text-[#86868B]">{{headline}}</span>
+                </div>
+                <input
+                  type="text"
+                  id="headline"
+                  required
+                  placeholder="Contoh: Titanium. Built for Apple Intelligence."
+                  class="apple-input w-full rounded-2xl border border-[#D2D2D7] bg-[#FBFBFD] px-4 py-3 text-sm text-[#1D1D1F] placeholder-[#86868B]/70"
+                />
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label for="subheadline" class="block text-xs font-semibold uppercase tracking-wider text-[#1D1D1F]">
+                    Subheadline <span class="text-red-500">*</span>
+                  </label>
+                  <span class="text-[11px] font-mono text-[#86868B]">{{subheadline}}</span>
+                </div>
+                <input
+                  type="text"
+                  id="subheadline"
+                  required
+                  placeholder="Contoh: Experience Pro innovation at Apple The Exchange TRX."
+                  class="apple-input w-full rounded-2xl border border-[#D2D2D7] bg-[#FBFBFD] px-4 py-3 text-sm text-[#1D1D1F] placeholder-[#86868B]/70"
+                />
+              </div>
+            </div>
+
+            <!-- FEATURE ITEMS (EXACTLY 3) -->
+            <div class="pt-2">
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-[#1D1D1F]">
+                    Feature Items (Wajib 3 Fitur) <span class="text-red-500">*</span>
+                  </label>
+                  <p class="text-xs text-[#86868B]">Hierarki visual bersih dengan judul dan deskripsi singkat.</p>
+                </div>
+                <span class="text-[11px] font-mono text-[#86868B]">{{feature_items}}</span>
+              </div>
+
+              <div class="space-y-3">
+                <!-- Feature 1 -->
+                <div class="rounded-2xl bg-[#F5F5F7]/70 border border-gray-200/80 p-3.5 sm:p-4">
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="w-5 h-5 rounded-full bg-[#1D1D1F] text-white text-[11px] font-semibold flex items-center justify-center">1</span>
+                    <span class="text-xs font-medium text-[#1D1D1F]">Feature Item 1</span>
+                  </div>
+                  <div class="grid grid-cols-1 sm:grid-cols-5 gap-2.5">
+                    <input
+                      type="text"
+                      id="feature1Title"
+                      required
+                      placeholder="Judul Fitur 1 (mis. A18 Pro Chip)"
+                      class="apple-input sm:col-span-2 rounded-xl border border-[#D2D2D7] bg-white px-3.5 py-2.5 text-sm text-[#1D1D1F] placeholder-[#86868B]/70"
+                    />
+                    <input
+                      type="text"
+                      id="feature1Desc"
+                      required
+                      placeholder="Deskripsi singkat fitur 1"
+                      class="apple-input sm:col-span-3 rounded-xl border border-[#D2D2D7] bg-white px-3.5 py-2.5 text-sm text-[#1D1D1F] placeholder-[#86868B]/70"
+                    />
+                  </div>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="rounded-2xl bg-[#F5F5F7]/70 border border-gray-200/80 p-3.5 sm:p-4">
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="w-5 h-5 rounded-full bg-[#1D1D1F] text-white text-[11px] font-semibold flex items-center justify-center">2</span>
+                    <span class="text-xs font-medium text-[#1D1D1F]">Feature Item 2</span>
+                  </div>
+                  <div class="grid grid-cols-1 sm:grid-cols-5 gap-2.5">
+                    <input
+                      type="text"
+                      id="feature2Title"
+                      required
+                      placeholder="Judul Fitur 2 (mis. 48MP Fusion Camera)"
+                      class="apple-input sm:col-span-2 rounded-xl border border-[#D2D2D7] bg-white px-3.5 py-2.5 text-sm text-[#1D1D1F] placeholder-[#86868B]/70"
+                    />
+                    <input
+                      type="text"
+                      id="feature2Desc"
+                      required
+                      placeholder="Deskripsi singkat fitur 2"
+                      class="apple-input sm:col-span-3 rounded-xl border border-[#D2D2D7] bg-white px-3.5 py-2.5 text-sm text-[#1D1D1F] placeholder-[#86868B]/70"
+                    />
+                  </div>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="rounded-2xl bg-[#F5F5F7]/70 border border-gray-200/80 p-3.5 sm:p-4">
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="w-5 h-5 rounded-full bg-[#1D1D1F] text-white text-[11px] font-semibold flex items-center justify-center">3</span>
+                    <span class="text-xs font-medium text-[#1D1D1F]">Feature Item 3</span>
+                  </div>
+                  <div class="grid grid-cols-1 sm:grid-cols-5 gap-2.5">
+                    <input
+                      type="text"
+                      id="feature3Title"
+                      required
+                      placeholder="Judul Fitur 3 (mis. Camera Control)"
+                      class="apple-input sm:col-span-2 rounded-xl border border-[#D2D2D7] bg-white px-3.5 py-2.5 text-sm text-[#1D1D1F] placeholder-[#86868B]/70"
+                    />
+                    <input
+                      type="text"
+                      id="feature3Desc"
+                      required
+                      placeholder="Deskripsi singkat fitur 3"
+                      class="apple-input sm:col-span-3 rounded-xl border border-[#D2D2D7] bg-white px-3.5 py-2.5 text-sm text-[#1D1D1F] placeholder-[#86868B]/70"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ART DIRECTION CONTROLS: BACKGROUND & COMPOSITION -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <!-- BACKGROUND -->
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label for="backgroundSelect" class="block text-xs font-semibold uppercase tracking-wider text-[#1D1D1F]">
+                    Background
+                  </label>
+                  <span class="text-[11px] font-mono text-[#86868B]">{{background}}</span>
+                </div>
+                <select
+                  id="backgroundSelect"
+                  class="apple-input w-full rounded-2xl border border-[#D2D2D7] bg-[#FBFBFD] px-4 py-3 text-sm text-[#1D1D1F]"
+                >
+                  <option value="Clean White Premium" selected>Clean White Premium</option>
+                  <option value="Black Darkness Scratch">Black Darkness Scratch</option>
+                  <option value="Soft Grey Premium">Soft Grey Premium</option>
+                  <option value="Minimalist Studio">Minimalist Studio</option>
+                  <option value="Luxury Gradient">Luxury Gradient</option>
+                  <option value="Custom Background">Custom Background</option>
+                </select>
+                <!-- Conditional Custom Background Input -->
+                <div id="customBackgroundWrapper" class="hidden mt-2.5">
+                  <input
+                    type="text"
+                    id="customBackgroundInput"
+                    placeholder="Deskripsikan custom background (mis. Warm travertine stone podium with soft architectural sunlight)"
+                    class="apple-input w-full rounded-xl border border-[#D2D2D7] bg-white px-3.5 py-2.5 text-sm text-[#1D1D1F] placeholder-[#86868B]/70"
+                  />
+                </div>
+              </div>
+
+              <!-- COMPOSITION -->
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label for="compositionSelect" class="block text-xs font-semibold uppercase tracking-wider text-[#1D1D1F]">
+                    Composition
+                  </label>
+                  <span class="text-[11px] font-mono text-[#86868B]">{{composition}}</span>
+                </div>
+                <select
+                  id="compositionSelect"
+                  class="apple-input w-full rounded-2xl border border-[#D2D2D7] bg-[#FBFBFD] px-4 py-3 text-sm text-[#1D1D1F]"
+                >
+                  <option value="Center Hero — produk berada di tengah." selected>Center Hero — produk berada di tengah.</option>
+                  <option value="Left Product — produk di sebelah kiri, teks di kanan.">Left Product — produk di sebelah kiri, teks di kanan.</option>
+                  <option value="Right Product — produk di sebelah kanan, teks di kiri.">Right Product — produk di sebelah kanan, teks di kiri.</option>
+                  <option value="Editorial Layout — komposisi editorial premium.">Editorial Layout — komposisi editorial premium.</option>
+                  <option value="Dynamic Product — komposisi dinamis dengan perspektif produk.">Dynamic Product — komposisi dinamis dengan perspektif produk.</option>
+                  <option value="Minimalist Layout — komposisi minimalis dengan negative space.">Minimalist Layout — komposisi minimalis dengan negative space.</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- RENDER CONTROLS: QUALITY & IMAGE RATIO -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- QUALITY -->
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label for="qualitySelect" class="block text-xs font-semibold uppercase tracking-wider text-[#1D1D1F]">
+                    Quality
+                  </label>
+                  <span class="text-[11px] font-mono text-[#86868B]">{{quality}}</span>
+                </div>
+                <select
+                  id="qualitySelect"
+                  class="apple-input w-full rounded-2xl border border-[#D2D2D7] bg-[#FBFBFD] px-4 py-3 text-sm text-[#1D1D1F]"
+                >
+                  <option value="Premium Commercial Photography" selected>Premium Commercial Photography</option>
+                  <option value="Ultra Photorealistic">Ultra Photorealistic</option>
+                  <option value="Luxury Advertising">Luxury Advertising</option>
+                  <option value="Professional Studio Photography">Professional Studio Photography</option>
+                  <option value="High-End Product Rendering">High-End Product Rendering</option>
+                </select>
+              </div>
+
+              <!-- IMAGE RATIO -->
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label for="ratioSelect" class="block text-xs font-semibold uppercase tracking-wider text-[#1D1D1F]">
+                    Image Ratio
+                  </label>
+                  <span class="text-[11px] font-mono text-[#86868B]">{{ratio}}</span>
+                </div>
+                <select
+                  id="ratioSelect"
+                  class="apple-input w-full rounded-2xl border border-[#D2D2D7] bg-[#FBFBFD] px-4 py-3 text-sm text-[#1D1D1F]"
+                >
+                  <option value="4:5" selected>4:5 Portrait (Default)</option>
+                  <option value="1:1">1:1 Square</option>
+                  <option value="9:16">9:16 Story</option>
+                  <option value="16:9">16:9 Landscape</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- PRIMARY ACTION BAR -->
+            <div class="pt-4 border-t border-gray-100 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <button
+                type="submit"
+                id="generateImageBtn"
+                class="flex-1 inline-flex items-center justify-center gap-2.5 rounded-full bg-[#0071E3] hover:bg-[#0077ED] active:scale-[0.99] text-white font-medium text-sm px-6 py-3.5 shadow-apple-sm transition cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+                </svg>
+                <span id="generateBtnText">Generate Image</span>
+              </button>
+
+              <button
+                type="button"
+                id="optimizeVariablesBtn"
+                title="Gunakan AI Prompt Engineer untuk menyempurnakan deskripsi variabel tanpa mengubah struktur template atau fakta produk"
+                class="inline-flex items-center justify-center gap-2 rounded-full bg-[#F5F5F7] hover:bg-gray-200/80 text-[#1D1D1F] font-medium text-sm px-5 py-3.5 transition cursor-pointer disabled:opacity-60"
+              >
+                <svg class="w-4 h-4 text-[#0071E3]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
+                </svg>
+                <span id="optimizeBtnText">AI Refine Variables</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- RIGHT COLUMN: PROMPT PREVIEW & RESULT SECTION (5 cols on lg) -->
+      <div class="lg:col-span-5 space-y-6">
+
+        <!-- RESULT SECTION -->
+        <section id="resultSection" class="bg-white rounded-3xl border border-gray-200/80 shadow-apple-sm p-5 sm:p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h2 class="text-base font-semibold tracking-tight text-[#1D1D1F]">Visual Output</h2>
+              <p class="text-xs text-[#86868B]">Apple The Exchange TRX — Malaysia</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="resultRatioBadge" class="text-xs font-medium px-2.5 py-1 rounded-full bg-[#F5F5F7] text-[#1D1D1F] border border-gray-200/80">
+                4:5
+              </span>
+              <span id="generationStatusBadge" class="text-xs font-medium px-2.5 py-1 rounded-full bg-gray-100 text-[#86868B]">
+                Ready
+              </span>
+            </div>
+          </div>
+
+          <!-- Canvas / Preview Viewport -->
+          <div id="imageViewport" class="relative w-full rounded-2xl bg-[#F5F5F7] border border-gray-200/80 overflow-hidden flex items-center justify-center min-h-[340px] sm:min-h-[400px] transition-all">
+            <!-- Empty / Initial State -->
+            <div id="emptyStateView" class="text-center p-6 max-w-xs">
+              <div class="w-12 h-12 rounded-2xl bg-white shadow-apple-sm border border-gray-200/60 flex items-center justify-center mx-auto mb-3 text-[#86868B]">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                </svg>
+              </div>
+              <p class="text-sm font-medium text-[#1D1D1F]">Belum ada visual yang dibuat</p>
+              <p class="text-xs text-[#86868B] mt-1">Lengkapi form variabel di sebelah kiri lalu klik <strong class="font-medium text-[#1D1D1F]">Generate Image</strong>.</p>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loadingStateView" class="hidden text-center p-6">
+              <div class="w-10 h-10 border-2 border-[#0071E3] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+              <p class="text-sm font-medium text-[#1D1D1F]">Rendering Commercial Visual...</p>
+              <p class="text-xs text-[#86868B] mt-1">Menerapkan art direction Apple The Exchange TRX</p>
+            </div>
+
+            <!-- Error / Unavailable State -->
+            <div id="errorStateView" class="hidden text-center p-6 max-w-sm">
+              <div class="w-12 h-12 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center mx-auto mb-3 text-red-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                </svg>
+              </div>
+              <p id="errorTitle" class="text-sm font-semibold text-[#1D1D1F]">Image Generation Tidak Tersedia</p>
+              <p id="errorMessage" class="text-xs text-[#86868B] mt-1.5 leading-relaxed">
+                Layanan image generation tidak dapat memproses permintaan saat ini. Input Anda tetap tersimpan dengan aman.
+              </p>
+            </div>
+
+            <!-- Generated Image Display -->
+            <img
+              id="generatedImageEl"
+              alt="Apple The Exchange TRX Advertising Visual"
+              class="hidden w-full h-auto object-contain max-h-[540px]"
+            />
+          </div>
+
+          <!-- Result Actions -->
+          <div class="mt-4 grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              id="generateAgainBtn"
+              disabled
+              class="inline-flex items-center justify-center gap-2 rounded-full bg-[#F5F5F7] hover:bg-gray-200/80 text-[#1D1D1F] font-medium text-xs sm:text-sm px-4 py-3 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+              </svg>
+              <span>Generate Again</span>
+            </button>
+
+            <button
+              type="button"
+              id="downloadImageBtn"
+              disabled
+              class="inline-flex items-center justify-center gap-2 rounded-full bg-[#1D1D1F] hover:bg-black text-white font-medium text-xs sm:text-sm px-4 py-3 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+              </svg>
+              <span>Download Image</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- PROMPT PREVIEW SECTION -->
+        <section id="promptPreviewSection" class="bg-white rounded-3xl border border-gray-200/80 shadow-apple-sm p-5 sm:p-6">
+          <div class="flex items-center justify-between gap-2 mb-3">
+            <div>
+              <h2 class="text-base font-semibold tracking-tight text-[#1D1D1F]">Structured Prompt Preview</h2>
+              <p class="text-xs text-[#86868B]">Diperbarui otomatis sesuai template resmi.</p>
+            </div>
+            <button
+              type="button"
+              id="togglePromptBtn"
+              class="text-xs font-medium text-[#0071E3] hover:underline px-2 py-1 rounded-lg cursor-pointer"
+            >
+              Hide Prompt
+            </button>
+          </div>
+
+          <!-- Prompt Text Box -->
+          <div id="promptBodyWrapper" class="space-y-3">
+            <pre
+              id="finalPromptOutput"
+              class="w-full rounded-2xl bg-[#F5F5F7] border border-gray-200/80 p-4 text-xs font-mono text-[#1D1D1F] whitespace-pre-wrap break-words max-h-72 overflow-y-auto leading-relaxed"
+            ></pre>
+
+            <!-- Prompt Action Buttons: View Prompt, Copy Prompt, Edit Input, Reset Form -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+              <button
+                type="button"
+                id="viewPromptModalBtn"
+                class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#F5F5F7] hover:bg-gray-200/80 text-[#1D1D1F] font-medium text-xs py-2.5 px-3 transition cursor-pointer"
+              >
+                <span>View Prompt</span>
+              </button>
+
+              <button
+                type="button"
+                id="copyPromptBtn"
+                class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#F5F5F7] hover:bg-gray-200/80 text-[#1D1D1F] font-medium text-xs py-2.5 px-3 transition cursor-pointer"
+              >
+                <span>Copy Prompt</span>
+              </button>
+
+              <button
+                type="button"
+                id="editInputBtn"
+                class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#F5F5F7] hover:bg-gray-200/80 text-[#1D1D1F] font-medium text-xs py-2.5 px-3 transition cursor-pointer"
+              >
+                <span>Edit Input</span>
+              </button>
+
+              <button
+                type="button"
+                id="resetFormBtn"
+                class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 font-medium text-xs py-2.5 px-3 transition cursor-pointer"
+              >
+                <span>Reset Form</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- VIEW PROMPT FULL MODAL -->
+  <div id="promptModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl max-w-2xl w-full border border-gray-200 shadow-apple-lg overflow-hidden flex flex-col max-h-[85vh]">
+      <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <div>
+          <h3 class="text-base font-semibold text-[#1D1D1F]">Final Structured Prompt</h3>
+          <p class="text-xs text-[#86868B]">Apple The Exchange TRX — Malaysia</p>
+        </div>
+        <button type="button" id="closeModalBtn" class="w-8 h-8 rounded-full bg-[#F5F5F7] hover:bg-gray-200 flex items-center justify-center text-[#1D1D1F] cursor-pointer">
+          ✕
+        </button>
+      </div>
+      <div class="p-6 overflow-y-auto flex-1">
+        <pre id="modalPromptText" class="text-xs sm:text-sm font-mono text-[#1D1D1F] whitespace-pre-wrap break-words bg-[#F5F5F7] p-4 rounded-2xl border border-gray-200/80 leading-relaxed"></pre>
+      </div>
+      <div class="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 bg-[#FBFBFD]">
+        <button type="button" id="modalCopyBtn" class="rounded-full bg-[#0071E3] hover:bg-[#0077ED] text-white text-xs font-medium px-5 py-2.5 transition cursor-pointer">
+          Copy Prompt
+        </button>
+        <button type="button" id="modalCloseFooterBtn" class="rounded-full bg-[#F5F5F7] hover:bg-gray-200 text-[#1D1D1F] text-xs font-medium px-5 py-2.5 transition cursor-pointer">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * Apple The Exchange TRX — AI Image Generator
+     * Senior AI Application Developer & Commercial Image Art Director Architecture
+     */
+
+    // Default initial values for Reset & Clean Start
+    const DEFAULT_STATE = {
+      subject: "iPhone 16 Pro Max in Desert Titanium finish, angled slightly to showcase the Grade 5 titanium frame, triple-lens Pro camera system, and ultra-thin borders.",
+      headline: "Hello, Apple Intelligence.",
+      subheadline: "Experience the future of iPhone at Apple The Exchange TRX.",
+      features: [
+        { title: "A18 Pro Chip", description: "Unrivaled speed and efficiency for Pro workflows." },
+        { title: "48MP Fusion Camera", description: "4K120 fps Dolby Vision video and stunning detail." },
+        { title: "Camera Control", description: "Instant tactile access to pro camera tools." }
+      ],
+      background: "Clean White Premium",
+      customBackground: "",
+      composition: "Center Hero — produk berada di tengah.",
+      quality: "Premium Commercial Photography",
+      ratio: "4:5"
+    };
+
+    // Application Runtime State
+    let lastGeneratedPrompt = "";
+    let lastGeneratedRatio = "4:5";
+    let currentImageDataUrl = null;
+    let isGenerating = false;
+
+    // DOM Element References
+    const els = {
+      form: document.getElementById("promptForm"),
+      subject: document.getElementById("subject"),
+      headline: document.getElementById("headline"),
+      subheadline: document.getElementById("subheadline"),
+      f1Title: document.getElementById("feature1Title"),
+      f1Desc: document.getElementById("feature1Desc"),
+      f2Title: document.getElementById("feature2Title"),
+      f2Desc: document.getElementById("feature2Desc"),
+      f3Title: document.getElementById("feature3Title"),
+      f3Desc: document.getElementById("feature3Desc"),
+      backgroundSelect: document.getElementById("backgroundSelect"),
+      customBgWrapper: document.getElementById("customBackgroundWrapper"),
+      customBgInput: document.getElementById("customBackgroundInput"),
+      compositionSelect: document.getElementById("compositionSelect"),
+      qualitySelect: document.getElementById("qualitySelect"),
+      ratioSelect: document.getElementById("ratioSelect"),
+      finalPromptOutput: document.getElementById("finalPromptOutput"),
+      generateBtn: document.getElementById("generateImageBtn"),
+      generateBtnText: document.getElementById("generateBtnText"),
+      optimizeBtn: document.getElementById("optimizeVariablesBtn"),
+      optimizeBtnText: document.getElementById("optimizeBtnText"),
+      generateAgainBtn: document.getElementById("generateAgainBtn"),
+      downloadImageBtn: document.getElementById("downloadImageBtn"),
+      resultRatioBadge: document.getElementById("resultRatioBadge"),
+      generationStatusBadge: document.getElementById("generationStatusBadge"),
+      emptyStateView: document.getElementById("emptyStateView"),
+      loadingStateView: document.getElementById("loadingStateView"),
+      errorStateView: document.getElementById("errorStateView"),
+      errorTitle: document.getElementById("errorTitle"),
+      errorMessage: document.getElementById("errorMessage"),
+      generatedImageEl: document.getElementById("generatedImageEl"),
+      togglePromptBtn: document.getElementById("togglePromptBtn"),
+      promptBodyWrapper: document.getElementById("promptBodyWrapper"),
+      viewPromptModalBtn: document.getElementById("viewPromptModalBtn"),
+      copyPromptBtn: document.getElementById("copyPromptBtn"),
+      editInputBtn: document.getElementById("editInputBtn"),
+      resetFormBtn: document.getElementById("resetFormBtn"),
+      resetFormTopBtn: document.getElementById("resetFormTopBtn"),
+      promptModal: document.getElementById("promptModal"),
+      modalPromptText: document.getElementById("modalPromptText"),
+      closeModalBtn: document.getElementById("closeModalBtn"),
+      modalCloseFooterBtn: document.getElementById("modalCloseFooterBtn"),
+      modalCopyBtn: document.getElementById("modalCopyBtn"),
+      toastContainer: document.getElementById("toastContainer")
+    };
+
+    /**
+     * Show non-blocking Apple-style toast notification (No alert() used)
+     */
+    function showToast(message, type = "info") {
+      const toast = document.createElement("div");
+      const bgClass = type === "error"
+        ? "bg-red-600 text-white"
+        : type === "success"
+          ? "bg-[#1D1D1F] text-white"
+          : "bg-white text-[#1D1D1F] border border-gray-200";
+
+      toast.className = `pointer-events-auto rounded-2xl px-4 py-3 text-xs font-medium shadow-apple-md transition-all duration-300 transform translate-y-2 opacity-0 flex items-center justify-between gap-3 ${bgClass}`;
+      toast.innerHTML = `<span>${message}</span>`;
+      els.toastContainer.appendChild(toast);
+
+      requestAnimationFrame(() => {
+        toast.classList.remove("translate-y-2", "opacity-0");
+      });
+
+      setTimeout(() => {
+        toast.classList.add("opacity-0", "translate-y-2");
+        setTimeout(() => toast.remove(), 300);
+      }, 3200);
+    }
+
+    /**
+     * Read current values from form inputs
+     */
+    function getFormValues() {
+      const bgChoice = els.backgroundSelect.value;
+      const resolvedBackground = bgChoice === "Custom Background"
+        ? (els.customBgInput.value.trim() || "Custom Background")
+        : bgChoice;
+
+      return {
+        subject: els.subject.value.trim(),
+        headline: els.headline.value.trim(),
+        subheadline: els.subheadline.value.trim(),
+        features: [
+          { title: els.f1Title.value.trim(), description: els.f1Desc.value.trim() },
+          { title: els.f2Title.value.trim(), description: els.f2Desc.value.trim() },
+          { title: els.f3Title.value.trim(), description: els.f3Desc.value.trim() }
+        ],
+        background: resolvedBackground,
+        composition: els.compositionSelect.value,
+        quality: els.qualitySelect.value,
+        ratio: els.ratioSelect.value
+      };
+    }
+
+    /**
+     * PROMPT TEMPLATE ENGINE
+     * Strictly preserves the exact required template structure and variable slots.
+     */
+    function buildStructuredPrompt(values) {
+      const featureItemsFormatted = values.features
+        .map((f, idx) => `${idx + 1}. ${f.title || "[Feature Title]"} — ${f.description || "[Feature Description]"}`)
+        .join("\n");
+
+      return `Create a premium Apple product advertising visual for Apple The Exchange TRX, Malaysia.
+SUBJECT
+${values.subject || "[Subject]"}
+Present the product as the main visual hero. Preserve its authentic Apple industrial design, proportions, materials, details, and recognizable appearance.
+HEADLINE
+"${values.headline || "[Headline]"}"
+Display the headline prominently with elegant, premium typography.
+SUBHEADLINE
+"${values.subheadline || "[Subheadline]"}"
+Position directly below the headline with balanced spacing and excellent readability.
+FEATURE ITEMS
+${featureItemsFormatted}
+Display exactly 3 product features using a clean, sophisticated visual hierarchy. Each feature contains a title and a short description.
+BACKGROUND
+${values.background}
+Use a clean, premium Apple-inspired background with subtle depth, refined lighting, and generous negative space.
+COMPOSITION
+${values.composition}
+Arrange the product and text elements into a balanced advertising composition. Ensure the product remains the primary focal point.
+BRAND IDENTITY
+Apple The Exchange TRX — Malaysia.
+Maintain a premium Apple retail advertising aesthetic. Do not invent additional logos or brand marks.
+QUALITY
+${values.quality}
+Photorealistic materials, precise product details, refined shadows, realistic reflections, professional commercial art direction.
+IMAGE RATIO
+${values.ratio}
+Default: 4:5 portrait.
+FINAL INSTRUCTION
+Generate one polished, high-end commercial advertising image. Maintain visual consistency, clean spacing, legible typography, and premium Apple-inspired art direction. Avoid clutter, distorted products, incorrect text, watermarks, and unnecessary decorative elements.`;
+    }
+
+    /**
+     * Update live prompt preview & ratio badge
+     */
+    function updatePromptPreview() {
+      const values = getFormValues();
+      const prompt = buildStructuredPrompt(values);
+      els.finalPromptOutput.textContent = prompt;
+      els.modalPromptText.textContent = prompt;
+      els.resultRatioBadge.textContent = values.ratio;
+    }
+
+    /**
+     * Validate required inputs before image generation
+     */
+    function validateInputs(values) {
+      if (!values.subject) {
+        return { valid: false, message: "Mohon isi variabel SUBJECT (produk Apple utama).", focusEl: els.subject };
+      }
+      if (!values.headline) {
+        return { valid: false, message: "Mohon isi variabel HEADLINE.", focusEl: els.headline };
+      }
+      if (!values.subheadline) {
+        return { valid: false, message: "Mohon isi variabel SUBHEADLINE.", focusEl: els.subheadline };
+      }
+      for (let i = 0; i < 3; i++) {
+        if (!values.features[i].title || !values.features[i].description) {
+          const focusEl = i === 0 ? els.f1Title : i === 1 ? els.f2Title : els.f3Title;
+          return {
+            valid: false,
+            message: `Feature Item ${i + 1} wajib memiliki judul dan deskripsi (harus tepat 3 feature).`,
+            focusEl
+          };
+        }
+      }
+      if (els.backgroundSelect.value === "Custom Background" && !els.customBgInput.value.trim()) {
+        return { valid: false, message: "Mohon isi deskripsi Custom Background.", focusEl: els.customBgInput };
+      }
+      return { valid: true };
+    }
+
+    /**
+     * Exponential backoff fetch helper for Gemini API calls
+     */
+    async function fetchWithRetry(url, options, maxRetries = 3) {
+      let delay = 1000;
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+          const response = await fetch(url, options);
+          if (response.status === 429 || response.status >= 500) {
+            if (attempt < maxRetries) {
+              await new Promise(r => setTimeout(r, delay));
+              delay *= 2;
+              continue;
+            }
+          }
+          return response;
+        } catch (err) {
+          if (attempt < maxRetries) {
+            await new Promise(r => setTimeout(r, delay));
+            delay *= 2;
+            continue;
+          }
+          throw err;
+        }
+      }
+    }
+
+    /**
+     * AI PROMPT ENGINE: Refine variable descriptions using Gemini Text API
+     * Strictly preserves product identity, specs, 3 features, and never alters template structure.
+     */
+    async function handleOptimizeVariables() {
+      const values = getFormValues();
+      const validation = validateInputs(values);
+      if (!validation.valid) {
+        showToast(validation.message, "error");
+        validation.focusEl?.focus();
+        return;
+      }
+
+      els.optimizeBtn.disabled = true;
+      els.optimizeBtnText.textContent = "Refining...";
+
+      try {
+        const apiKey = "";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+        const systemInstruction = `You are a Senior AI Prompt Engineer and Professional Commercial Image Art Director for Apple The Exchange TRX, Malaysia.
+Your task is to refine and polish the user's input variables so they read like authentic, high-end Apple commercial advertising art direction.
+STRICT RULES:
+1. Do NOT change the Apple product identity or invent fake technical specifications.
+2. Ensure headline and subheadline are cohesive, refined, and non-contradictory.
+3. Return EXACTLY 3 feature items, each with a concise title and short description.
+4. Keep the language consistent with the user's input (English or Indonesian, defaulting to crisp Apple advertising English if mixed).
+5. Return ONLY valid JSON matching the schema.`;
+
+        const payload = {
+          contents: [{
+            role: "user",
+            parts: [{
+              text: JSON.stringify({
+                subject: values.subject,
+                headline: values.headline,
+                subheadline: values.subheadline,
+                features: values.features
+              })
+            }]
+          }],
+          systemInstruction: { parts: [{ text: systemInstruction }] },
+          generationConfig: {
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: "OBJECT",
+              properties: {
+                subject: { type: "STRING" },
+                headline: { type: "STRING" },
+                subheadline: { type: "STRING" },
+                features: {
+                  type: "ARRAY",
+                  items: {
+                    type: "OBJECT",
+                    properties: {
+                      title: { type: "STRING" },
+                      description: { type: "STRING" }
+                    },
+                    required: ["title", "description"]
+                  }
+                }
+              },
+              required: ["subject", "headline", "subheadline", "features"]
+            }
+          }
+        };
+
+        const response = await fetchWithRetry(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const result = await response.json();
+        const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!text) throw new Error("Empty response from AI Prompt Engine");
+
+        const refined = JSON.parse(text);
+        if (refined.subject) els.subject.value = refined.subject;
+        if (refined.headline) els.headline.value = refined.headline;
+        if (refined.subheadline) els.subheadline.value = refined.subheadline;
+        if (Array.isArray(refined.features) && refined.features.length === 3) {
+          els.f1Title.value = refined.features[0].title;
+          els.f1Desc.value = refined.features[0].description;
+          els.f2Title.value = refined.features[1].title;
+          els.f2Desc.value = refined.features[1].description;
+          els.f3Title.value = refined.features[2].title;
+          els.f3Desc.value = refined.features[2].description;
+        }
+
+        updatePromptPreview();
+        showToast("Variabel berhasil dioptimalkan sesuai standar Apple Art Direction.", "success");
+      } catch (err) {
+        showToast("Optimasi AI tidak tersedia saat ini. Input asli Anda tetap dipertahankan.", "error");
+      } finally {
+        els.optimizeBtn.disabled = false;
+        els.optimizeBtnText.textContent = "AI Refine Variables";
+      }
+    }
+
+    /**
+     * Switch Result Viewport UI States
+     */
+    function setResultState(state, errorTitle = "", errorDetail = "") {
+      els.emptyStateView.classList.add("hidden");
+      els.loadingStateView.classList.add("hidden");
+      els.errorStateView.classList.add("hidden");
+      els.generatedImageEl.classList.add("hidden");
+
+      if (state === "empty") {
+        els.emptyStateView.classList.remove("hidden");
+        els.generationStatusBadge.textContent = "Ready";
+        els.generationStatusBadge.className = "text-xs font-medium px-2.5 py-1 rounded-full bg-gray-100 text-[#86868B]";
+      } else if (state === "loading") {
+        els.loadingStateView.classList.remove("hidden");
+        els.generationStatusBadge.textContent = "Generating...";
+        els.generationStatusBadge.className = "text-xs font-medium px-2.5 py-1 rounded-full bg-blue-50 text-[#0071E3]";
+      } else if (state === "error") {
+        els.errorStateView.classList.remove("hidden");
+        els.errorTitle.textContent = errorTitle || "Image Generation Tidak Tersedia";
+        els.errorMessage.textContent = errorDetail || "Fitur image generation belum tersedia atau gagal merespons pada runtime ini. Input Anda tetap aman.";
+        els.generationStatusBadge.textContent = "Unavailable / Failed";
+        els.generationStatusBadge.className = "text-xs font-medium px-2.5 py-1 rounded-full bg-red-50 text-red-600";
+      } else if (state === "success") {
+        els.generatedImageEl.classList.remove("hidden");
+        els.generationStatusBadge.textContent = "Completed";
+        els.generationStatusBadge.className = "text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700";
+      }
+    }
+
+    /**
+     * Execute Image Generation via Gemini Image Generation API (gemini-3.1-flash-image)
+     */
+    async function executeImageGeneration(useCachedPrompt = false) {
+      if (isGenerating) return;
+
+      let promptToRun = "";
+      let ratioToRun = "";
+
+      if (useCachedPrompt && lastGeneratedPrompt) {
+        promptToRun = lastGeneratedPrompt;
+        ratioToRun = lastGeneratedRatio;
+      } else {
+        const values = getFormValues();
+        const validation = validateInputs(values);
+        if (!validation.valid) {
+          showToast(validation.message, "error");
+          validation.focusEl?.focus();
+          return;
+        }
+        promptToRun = buildStructuredPrompt(values);
+        ratioToRun = values.ratio;
+        lastGeneratedPrompt = promptToRun;
+        lastGeneratedRatio = ratioToRun;
+      }
+
+      isGenerating = true;
+      els.generateBtn.disabled = true;
+      els.generateBtnText.textContent = "Generating...";
+      els.generateAgainBtn.disabled = true;
+      els.downloadImageBtn.disabled = true;
+      els.resultRatioBadge.textContent = ratioToRun;
+      setResultState("loading");
+
+      try {
+        const apiKey = "";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`;
+
+        const payload = {
+          contents: [{
+            role: "user",
+            parts: [{ text: promptToRun }]
+          }],
+          generationConfig: {
+            responseModalities: ["IMAGE"],
+            imageConfig: {
+              aspectRatio: ratioToRun
+            }
+          }
+        };
+
+        const response = await fetchWithRetry(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response || !response.ok) {
+          let errDetail = "Kemampuan image generation tidak tersedia pada runtime Gemini Canvas saat ini atau terjadi gangguan layanan.";
+          try {
+            const errJson = await response.json();
+            if (errJson?.error?.message) {
+              errDetail = `Layanan Image Generation mengembalikan pesan: ${errJson.error.message}`;
+            }
+          } catch (_) {}
+          throw new Error(errDetail);
+        }
+
+        const result = await response.json();
+        const imagePart = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData && p.inlineData.data);
+
+        if (!imagePart) {
+          throw new Error("Fitur image generation tidak menghasilkan data gambar pada runtime ini. Silakan periksa ketersediaan model image generation.");
+        }
+
+        const mimeType = imagePart.inlineData.mimeType || "image/png";
+        const dataUrl = `data:${mimeType};base64,${imagePart.inlineData.data}`;
+
+        currentImageDataUrl = dataUrl;
+        els.generatedImageEl.src = dataUrl;
+        setResultState("success");
+
+        els.generateAgainBtn.disabled = false;
+        els.downloadImageBtn.disabled = false;
+        showToast("Visual advertising Apple The Exchange TRX berhasil dibuat.", "success");
+
+      } catch (error) {
+        currentImageDataUrl = null;
+        setResultState(
+          "error",
+          "Image Generation Belum Tersedia / Gagal",
+          error.message || "Fitur image generation belum tersedia dalam runtime Gemini Canvas ini. Seluruh input form Anda tetap dipertahankan."
+        );
+        // Allow Generate Again if a prompt was prepared
+        if (lastGeneratedPrompt) {
+          els.generateAgainBtn.disabled = false;
+        }
+      } finally {
+        isGenerating = false;
+        els.generateBtn.disabled = false;
+        els.generateBtnText.textContent = "Generate Image";
+      }
+    }
+
+    /**
+     * Copy Prompt to Clipboard (Using execCommand fallback per iframe rules)
+     */
+    function copyPromptToClipboard() {
+      const promptText = els.finalPromptOutput.textContent;
+      if (!promptText) return;
+
+      const tempTextarea = document.createElement("textarea");
+      tempTextarea.value = promptText;
+      tempTextarea.style.position = "fixed";
+      tempTextarea.style.opacity = "0";
+      document.body.appendChild(tempTextarea);
+      tempTextarea.select();
+
+      try {
+        const successful = document.execCommand("copy");
+        if (successful) {
+          showToast("Structured prompt berhasil disalin ke clipboard.", "success");
+        } else {
+          showToast("Gagal menyalin prompt.", "error");
+        }
+      } catch (err) {
+        showToast("Browser tidak mendukung penyalinan otomatis.", "error");
+      } finally {
+        document.body.removeChild(tempTextarea);
+      }
+    }
+
+    /**
+     * Download Generated Image
+     */
+    function downloadGeneratedImage() {
+      if (!currentImageDataUrl) {
+        showToast("Belum ada gambar yang dapat diunduh.", "error");
+        return;
+      }
+      const link = document.createElement("a");
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+      const ratioSlug = lastGeneratedRatio.replace(":", "x");
+      link.href = currentImageDataUrl;
+      link.download = `Apple-The-Exchange-TRX-${ratioSlug}-${timestamp}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast("Mengunduh hasil gambar...", "success");
+    }
+
+    /**
+     * Populate / Reset Form to Default State
+     */
+    function resetFormToDefault(notify = true) {
+      els.subject.value = DEFAULT_STATE.subject;
+      els.headline.value = DEFAULT_STATE.headline;
+      els.subheadline.value = DEFAULT_STATE.subheadline;
+
+      els.f1Title.value = DEFAULT_STATE.features[0].title;
+      els.f1Desc.value = DEFAULT_STATE.features[0].description;
+      els.f2Title.value = DEFAULT_STATE.features[1].title;
+      els.f2Desc.value = DEFAULT_STATE.features[1].description;
+      els.f3Title.value = DEFAULT_STATE.features[2].title;
+      els.f3Desc.value = DEFAULT_STATE.features[2].description;
+
+      els.backgroundSelect.value = DEFAULT_STATE.background;
+      els.customBgInput.value = DEFAULT_STATE.customBackground;
+      els.customBgWrapper.classList.add("hidden");
+
+      els.compositionSelect.value = DEFAULT_STATE.composition;
+      els.qualitySelect.value = DEFAULT_STATE.quality;
+      els.ratioSelect.value = DEFAULT_STATE.ratio;
+
+      lastGeneratedPrompt = "";
+      lastGeneratedRatio = DEFAULT_STATE.ratio;
+      currentImageDataUrl = null;
+      els.generateAgainBtn.disabled = true;
+      els.downloadImageBtn.disabled = true;
+
+      setResultState("empty");
+      updatePromptPreview();
+
+      if (notify) {
+        showToast("Seluruh input dikembalikan ke nilai default.", "info");
+      }
+    }
+
+    /**
+     * Event Listeners Setup
+     */
+    function initEventListeners() {
+      // Live update prompt preview whenever any input changes
+      const liveInputs = [
+        els.subject, els.headline, els.subheadline,
+        els.f1Title, els.f1Desc, els.f2Title, els.f2Desc, els.f3Title, els.f3Desc,
+        els.backgroundSelect, els.customBgInput,
+        els.compositionSelect, els.qualitySelect, els.ratioSelect
+      ];
+
+      liveInputs.forEach(input => {
+        input.addEventListener("input", () => {
+          // Clear cached prompt if user modifies inputs so Generate Again uses fresh state
+          lastGeneratedPrompt = "";
+          updatePromptPreview();
+        });
+        input.addEventListener("change", () => {
+          lastGeneratedPrompt = "";
+          updatePromptPreview();
+        });
+      });
+
+      // Toggle Custom Background field visibility
+      els.backgroundSelect.addEventListener("change", () => {
+        if (els.backgroundSelect.value === "Custom Background") {
+          els.customBgWrapper.classList.remove("hidden");
+          els.customBgInput.focus();
+        } else {
+          els.customBgWrapper.classList.add("hidden");
+        }
+        updatePromptPreview();
+      });
+
+      // Main Form Submit -> Generate Image
+      els.form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        executeImageGeneration(false);
+      });
+
+      // AI Refine Variables
+      els.optimizeBtn.addEventListener("click", handleOptimizeVariables);
+
+      // Generate Again (uses exact same prompt if inputs haven't changed)
+      els.generateAgainBtn.addEventListener("click", () => {
+        executeImageGeneration(Boolean(lastGeneratedPrompt));
+      });
+
+      // Download Image
+      els.downloadImageBtn.addEventListener("click", downloadGeneratedImage);
+
+      // Toggle Prompt Collapse/Expand
+      els.togglePromptBtn.addEventListener("click", () => {
+        const isHidden = els.promptBodyWrapper.classList.toggle("hidden");
+        els.togglePromptBtn.textContent = isHidden ? "Show Prompt" : "Hide Prompt";
+      });
+
+      // View Prompt Modal
+      els.viewPromptModalBtn.addEventListener("click", () => {
+        els.modalPromptText.textContent = els.finalPromptOutput.textContent;
+        els.promptModal.classList.remove("hidden");
+        els.promptModal.classList.add("flex");
+      });
+
+      const closeModal = () => {
+        els.promptModal.classList.add("hidden");
+        els.promptModal.classList.remove("flex");
+      };
+      els.closeModalBtn.addEventListener("click", closeModal);
+      els.modalCloseFooterBtn.addEventListener("click", closeModal);
+      els.promptModal.addEventListener("click", (e) => {
+        if (e.target === els.promptModal) closeModal();
+      });
+
+      // Copy Prompt buttons
+      els.copyPromptBtn.addEventListener("click", copyPromptToClipboard);
+      els.modalCopyBtn.addEventListener("click", copyPromptToClipboard);
+
+      // Edit Input button (smooth scroll & focus on Subject)
+      els.editInputBtn.addEventListener("click", () => {
+        document.getElementById("inputSection").scrollIntoView({ behavior: "smooth" });
+        els.subject.focus();
+      });
+
+      // Reset Form buttons
+      els.resetFormBtn.addEventListener("click", () => resetFormToDefault(true));
+      els.resetFormTopBtn.addEventListener("click", () => resetFormToDefault(true));
+    }
+
+    // Initialize Application on Load
+    window.addEventListener("DOMContentLoaded", () => {
+      resetFormToDefault(false);
+      initEventListeners();
+    });
+  </script>
+</body>
+</html>
