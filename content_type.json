@@ -1,0 +1,19 @@
+{
+  "content_types": [
+    "product_showcase",
+    "product_promotion",
+    "product_education",
+    "tips_tutorial",
+    "product_comparison",
+    "quiz_interaction",
+    "lifestyle",
+    "product_features",
+    "announcement",
+    "news_update",
+    "customer_testimonial",
+    "seasonal_campaign",
+    "special_offer",
+    "brand_awareness",
+    "engagement"
+  ]
+}
