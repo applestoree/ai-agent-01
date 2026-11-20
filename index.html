@@ -123,6 +123,16 @@
           </div>
 
           <form id="promptForm" class="space-y-6" novalidate>
+            <!-- CONTENT TYPE -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label for="contentTypeSelect" class="block text-xs font-semibold uppercase tracking-wider text-[#1D1D1F]">Content Type <span class="text-red-500">*</span></label>
+                <span class="text-[11px] font-mono text-[#86868B]">{{content_type}}</span>
+              </div>
+              <select id="contentTypeSelect" required class="apple-input w-full rounded-2xl border border-[#D2D2D7] bg-[#FBFBFD] px-4 py-3 text-sm text-[#1D1D1F]"><option value="">Loading content types...</option></select>
+              <p class="text-xs text-[#86868B] mt-1.5">Kategori tujuan konten dimuat dari content_type.json.</p>
+            </div>
+
             <!-- SUBJECT TYPE -->
             <div>
               <div class="flex items-center justify-between mb-1.5">
@@ -581,8 +591,10 @@
       quality: "Ultra-realistic, photorealistic, 8K resolution, sharp details."
     };
 
-    // Subject type definitions are loaded from the repository JSON source.
+    // Content and subject type definitions are loaded from repository JSON sources.
+    const CONTENT_TYPES_URL = "https://raw.githubusercontent.com/applestoree/ai-agent-01/refs/heads/main/content_type.json";
     const SUBJECT_TYPES_URL = "https://raw.githubusercontent.com/applestoree/ai-agent-01/refs/heads/main/subject_types.json";
+    let contentTypes = [];
     let subjectTypes = [];
 
     // Fixed image output ratio: 4:5 portrait only
@@ -597,6 +609,7 @@
     // DOM Element References
     const els = {
       form: document.getElementById("promptForm"),
+      contentTypeSelect: document.getElementById("contentTypeSelect"),
       subjectTypeSelect: document.getElementById("subjectTypeSelect"),
       subjectTypeDescription: document.getElementById("subjectTypeDescription"),
       subject: document.getElementById("subject"),
@@ -668,6 +681,25 @@
       }, 3200);
     }
 
+    /** Load content type options from content_type.json. */
+    async function loadContentTypes() {
+      const response = await fetch(CONTENT_TYPES_URL, { cache: "no-store" });
+      if (!response.ok) throw new Error(`Unable to load content types (HTTP ${response.status})`);
+      const data = await response.json();
+      if (!Array.isArray(data.content_types) || data.content_types.length === 0 || !data.content_types.every(item => typeof item === "string")) {
+        throw new Error("content_type.json does not contain a valid content_types array.");
+      }
+      contentTypes = data.content_types;
+      els.contentTypeSelect.innerHTML = "";
+      contentTypes.forEach(item => {
+        const option = document.createElement("option");
+        option.value = item;
+        option.textContent = item.replace(/_/g, " ").replace(/\b\w/g, char => char.toUpperCase());
+        els.contentTypeSelect.appendChild(option);
+      });
+      els.contentTypeSelect.value = contentTypes.includes("product_showcase") ? "product_showcase" : contentTypes[0];
+    }
+
     /**
      * Load subject type options from subject_types.json.
      * The JSON file is the single source of truth for available types.
@@ -705,6 +737,7 @@
     function getFormValues() {
       const selectedSubjectType = subjectTypes.find(item => item.id === els.subjectTypeSelect.value);
       return {
+        content_type: els.contentTypeSelect.value || "",
         subject_type: selectedSubjectType || null,
         subject: els.subject.value.trim(),
         headline: els.headline.value.trim(),
@@ -732,6 +765,9 @@
         .join("\n");
 
       return `Create a premium Apple product advertising visual for Apple The Exchange TRX, Malaysia.
+CONTENT TYPE
+ID: ${values.content_type || "[Content Type]"}
+Use this content type to guide the communication objective, message, and visual storytelling.
 SUBJECT TYPE
 ID: ${values.subject_type?.id || "[Subject Type ID]"}
 Name: ${values.subject_type?.name || "[Subject Type]"}
@@ -858,7 +894,8 @@ Generate one polished, high-end commercial advertising image. Maintain visual co
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
         const systemInstruction = `You are a Senior AI Prompt Engineer and Professional Commercial Image Art Director for Apple The Exchange TRX, Malaysia.
-Your task is to refine and polish the user's input variables so they read like authentic, high-end Apple commercial advertising art direction.
+Refine the creative brief and classify it using the supplied content_type and subject_type reference lists.
+Select exactly one content_type and one subject_type that best match the product, headline, subheadline, features, and visual objective. Only return IDs present in the supplied lists.
 STRICT RULES:
 1. Do NOT change the Apple product identity or invent fake technical specifications.
 2. Ensure headline and subheadline are cohesive, refined, and non-contradictory.
@@ -871,6 +908,10 @@ STRICT RULES:
             role: "user",
             parts: [{
               text: JSON.stringify({
+                available_content_types: contentTypes,
+                available_subject_types: subjectTypes.map(item => ({ id: item.id, name: item.name, description: item.description })),
+                current_content_type: values.content_type,
+                current_subject_type: values.subject_type?.id || "",
                 subject: values.subject,
                 headline: values.headline,
                 subheadline: values.subheadline,
@@ -884,6 +925,8 @@ STRICT RULES:
             responseSchema: {
               type: "OBJECT",
               properties: {
+                content_type: { type: "STRING" },
+                subject_type: { type: "STRING" },
                 subject: { type: "STRING" },
                 headline: { type: "STRING" },
                 subheadline: { type: "STRING" },
@@ -899,7 +942,7 @@ STRICT RULES:
                   }
                 }
               },
-              required: ["subject", "headline", "subheadline", "features"]
+              required: ["content_type", "subject_type", "subject", "headline", "subheadline", "features"]
             }
           }
         };
@@ -919,6 +962,9 @@ STRICT RULES:
         if (!text) throw new Error("Empty response from AI Prompt Engine");
 
         const refined = JSON.parse(text);
+        if (contentTypes.includes(refined.content_type)) els.contentTypeSelect.value = refined.content_type;
+        if (subjectTypes.some(item => item.id === refined.subject_type)) els.subjectTypeSelect.value = refined.subject_type;
+        updateSubjectTypeDescription();
         if (refined.subject) els.subject.value = refined.subject;
         if (refined.headline) els.headline.value = refined.headline;
         if (refined.subheadline) els.subheadline.value = refined.subheadline;
@@ -1126,6 +1172,9 @@ STRICT RULES:
      * Populate / Reset Form to Default State
      */
     function resetFormToDefault(notify = true) {
+      if (contentTypes.length > 0) {
+        els.contentTypeSelect.value = contentTypes.includes("product_showcase") ? "product_showcase" : contentTypes[0];
+      }
       if (subjectTypes.length > 0) {
         els.subjectTypeSelect.value = subjectTypes[0].id;
         updateSubjectTypeDescription();
@@ -1183,6 +1232,11 @@ STRICT RULES:
           lastGeneratedPrompt = "";
           updatePromptPreview();
         });
+      });
+
+      els.contentTypeSelect.addEventListener("change", () => {
+        lastGeneratedPrompt = "";
+        updatePromptPreview();
       });
 
       els.subjectTypeSelect.addEventListener("change", () => {
@@ -1250,14 +1304,17 @@ STRICT RULES:
     window.addEventListener("DOMContentLoaded", async () => {
       initEventListeners();
       try {
-        await loadSubjectTypes();
+        await Promise.all([loadContentTypes(), loadSubjectTypes()]);
         resetFormToDefault(false);
       } catch (error) {
-        console.error("Subject type loading failed:", error);
-        els.subjectTypeSelect.innerHTML = '<option value="">Unable to load subject types</option>';
-        els.subjectTypeDescription.textContent = "Gagal memuat subject_types.json. Periksa koneksi lalu refresh halaman.";
+        console.error("Reference JSON loading failed:", error);
+        if (contentTypes.length === 0) els.contentTypeSelect.innerHTML = '<option value="">Unable to load content types</option>';
+        if (subjectTypes.length === 0) {
+          els.subjectTypeSelect.innerHTML = '<option value="">Unable to load subject types</option>';
+          els.subjectTypeDescription.textContent = "Gagal memuat subject_types.json. Periksa koneksi lalu refresh halaman.";
+        }
         resetFormToDefault(false);
-        showToast("Gagal memuat Subject Type dari subject_types.json.", "error");
+        showToast("Gagal memuat content_type.json atau subject_types.json.", "error");
       }
     });
   </script>
