@@ -123,6 +123,24 @@
           </div>
 
           <form id="promptForm" class="space-y-6" novalidate>
+            <!-- SUBJECT TYPE -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label for="subjectTypeSelect" class="block text-xs font-semibold uppercase tracking-wider text-[#1D1D1F]">
+                  Subject Type <span class="text-red-500">*</span>
+                </label>
+                <span class="text-[11px] font-mono text-[#86868B]">{{subject_type}}</span>
+              </div>
+              <select
+                id="subjectTypeSelect"
+                required
+                class="apple-input w-full rounded-2xl border border-[#D2D2D7] bg-[#FBFBFD] px-4 py-3 text-sm text-[#1D1D1F]"
+              >
+                <option value="">Loading subject types...</option>
+              </select>
+              <p id="subjectTypeDescription" class="text-xs text-[#86868B] mt-1.5">Pilihan kategori subject dimuat dari subject_types.json.</p>
+            </div>
+
             <!-- SUBJECT -->
             <div>
               <div class="flex items-center justify-between mb-1.5">
@@ -563,6 +581,10 @@
       quality: "Ultra-realistic, photorealistic, 8K resolution, sharp details."
     };
 
+    // Subject type definitions are loaded from the repository JSON source.
+    const SUBJECT_TYPES_URL = "https://raw.githubusercontent.com/applestoree/ai-agent-01/refs/heads/main/subject_types.json";
+    let subjectTypes = [];
+
     // Fixed image output ratio: 4:5 portrait only
     const IMAGE_RATIO = "4:5";
 
@@ -575,6 +597,8 @@
     // DOM Element References
     const els = {
       form: document.getElementById("promptForm"),
+      subjectTypeSelect: document.getElementById("subjectTypeSelect"),
+      subjectTypeDescription: document.getElementById("subjectTypeDescription"),
       subject: document.getElementById("subject"),
       headline: document.getElementById("headline"),
       subheadline: document.getElementById("subheadline"),
@@ -645,10 +669,43 @@
     }
 
     /**
+     * Load subject type options from subject_types.json.
+     * The JSON file is the single source of truth for available types.
+     */
+    async function loadSubjectTypes() {
+      const response = await fetch(SUBJECT_TYPES_URL, { cache: "no-store" });
+      if (!response.ok) throw new Error(`Unable to load subject types (HTTP ${response.status})`);
+      const data = await response.json();
+      if (!Array.isArray(data.subject_types) || data.subject_types.length === 0) {
+        throw new Error("subject_types.json does not contain any subject types.");
+      }
+
+      subjectTypes = data.subject_types;
+      els.subjectTypeSelect.innerHTML = "";
+      subjectTypes.forEach((item) => {
+        const option = document.createElement("option");
+        option.value = item.id;
+        option.textContent = item.name;
+        els.subjectTypeSelect.appendChild(option);
+      });
+
+      // Default to the first item defined by subject_types.json.
+      els.subjectTypeSelect.value = subjectTypes[0].id;
+      updateSubjectTypeDescription();
+    }
+
+    function updateSubjectTypeDescription() {
+      const selectedType = subjectTypes.find(item => item.id === els.subjectTypeSelect.value);
+      els.subjectTypeDescription.textContent = selectedType?.description || "Pilih subject type.";
+    }
+
+    /**
      * Read current values from form inputs
      */
     function getFormValues() {
+      const selectedSubjectType = subjectTypes.find(item => item.id === els.subjectTypeSelect.value);
       return {
+        subject_type: selectedSubjectType || null,
         subject: els.subject.value.trim(),
         headline: els.headline.value.trim(),
         subheadline: els.subheadline.value.trim(),
@@ -675,6 +732,10 @@
         .join("\n");
 
       return `Create a premium Apple product advertising visual for Apple The Exchange TRX, Malaysia.
+SUBJECT TYPE
+ID: ${values.subject_type?.id || "[Subject Type ID]"}
+Name: ${values.subject_type?.name || "[Subject Type]"}
+Description: ${values.subject_type?.description || "[Subject Type Description]"}
 SUBJECT
 ${values.subject || "[Subject]"}
 Present the product as the main visual hero. Preserve its authentic Apple industrial design, proportions, materials, details, and recognizable appearance.
@@ -724,6 +785,9 @@ Generate one polished, high-end commercial advertising image. Maintain visual co
      * Validate required inputs before image generation
      */
     function validateInputs(values) {
+      if (!values.subject_type) {
+        return { valid: false, message: "Subject Type belum tersedia. Periksa koneksi ke subject_types.json.", focusEl: els.subjectTypeSelect };
+      }
       if (!values.subject) {
         return { valid: false, message: "Mohon isi variabel SUBJECT (produk Apple utama).", focusEl: els.subject };
       }
@@ -1062,6 +1126,10 @@ STRICT RULES:
      * Populate / Reset Form to Default State
      */
     function resetFormToDefault(notify = true) {
+      if (subjectTypes.length > 0) {
+        els.subjectTypeSelect.value = subjectTypes[0].id;
+        updateSubjectTypeDescription();
+      }
       els.subject.value = DEFAULT_STATE.subject;
       els.headline.value = DEFAULT_STATE.headline;
       els.subheadline.value = DEFAULT_STATE.subheadline;
@@ -1115,6 +1183,12 @@ STRICT RULES:
           lastGeneratedPrompt = "";
           updatePromptPreview();
         });
+      });
+
+      els.subjectTypeSelect.addEventListener("change", () => {
+        updateSubjectTypeDescription();
+        lastGeneratedPrompt = "";
+        updatePromptPreview();
       });
 
       // Main Form Submit -> Generate Image
@@ -1173,9 +1247,18 @@ STRICT RULES:
     }
 
     // Initialize Application on Load
-    window.addEventListener("DOMContentLoaded", () => {
-      resetFormToDefault(false);
+    window.addEventListener("DOMContentLoaded", async () => {
       initEventListeners();
+      try {
+        await loadSubjectTypes();
+        resetFormToDefault(false);
+      } catch (error) {
+        console.error("Subject type loading failed:", error);
+        els.subjectTypeSelect.innerHTML = '<option value="">Unable to load subject types</option>';
+        els.subjectTypeDescription.textContent = "Gagal memuat subject_types.json. Periksa koneksi lalu refresh halaman.";
+        resetFormToDefault(false);
+        showToast("Gagal memuat Subject Type dari subject_types.json.", "error");
+      }
     });
   </script>
 </body>
