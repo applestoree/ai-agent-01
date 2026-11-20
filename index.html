@@ -594,8 +594,10 @@
     // Content and subject type definitions are loaded from repository JSON sources.
     const CONTENT_TYPES_URL = "https://raw.githubusercontent.com/applestoree/ai-agent-01/refs/heads/main/content_type.json";
     const SUBJECT_TYPES_URL = "https://raw.githubusercontent.com/applestoree/ai-agent-01/refs/heads/main/subject_types.json";
+    const SUBJECT_STRATEGIST_URL = "https://raw.githubusercontent.com/applestoree/ai-agent-01/refs/heads/main/ai-subject-strategist.md";
     let contentTypes = [];
     let subjectTypes = [];
+    let subjectStrategistInstruction = "";
 
     // Fixed image output ratio: 4:5 portrait only
     const IMAGE_RATIO = "4:5";
@@ -729,6 +731,106 @@
     function updateSubjectTypeDescription() {
       const selectedType = subjectTypes.find(item => item.id === els.subjectTypeSelect.value);
       els.subjectTypeDescription.textContent = selectedType?.description || "Pilih subject type.";
+    }
+
+    /** Load the AI Subject Strategist instructions from the repository. */
+    async function loadSubjectStrategist() {
+      const response = await fetch(SUBJECT_STRATEGIST_URL, { cache: "no-store" });
+      if (!response.ok) throw new Error(`Unable to load AI Subject Strategist (HTTP ${response.status})`);
+      const instruction = await response.text();
+      if (!instruction.trim() || !instruction.includes("AI Subject Strategist")) {
+        throw new Error("ai-subject-strategist.md is empty or invalid.");
+      }
+      subjectStrategistInstruction = instruction;
+    }
+
+    /**
+     * Generate the visual subject using the repository's AI Subject Strategist.
+     * The Markdown file is the system instruction; JSON files remain the category sources of truth.
+     */
+    async function generateSubjectWithStrategist(input, apiKey, apiUrl) {
+      if (!subjectStrategistInstruction) throw new Error("AI Subject Strategist instructions are not loaded.");
+
+      const payload = {
+        contents: [{
+          role: "user",
+          parts: [{
+            text: JSON.stringify({
+              available_content_types: contentTypes,
+              available_subject_types: subjectTypes,
+              content_type: input.content_type,
+              subject_type: input.subject_type,
+              product: {
+                name: input.product_name,
+                category: "",
+                model: "",
+                color: "",
+                material: "",
+                features: input.features.map(item => item.title).filter(Boolean)
+              },
+              campaign_objective: input.campaign_objective,
+              additional_context: {
+                product_context: input.product_context,
+                headline: input.headline,
+                subheadline: input.subheadline,
+                features: input.features
+              }
+            })
+          }]
+        }],
+        systemInstruction: { parts: [{ text: subjectStrategistInstruction }] },
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: "OBJECT",
+            properties: {
+              content_type: { type: "STRING" },
+              subject_type: { type: "STRING" },
+              subject: {
+                type: "OBJECT",
+                properties: {
+                  main_product: { type: "STRING" },
+                  supporting_products: { type: "ARRAY", items: { type: "STRING" } },
+                  visual_focus: { type: "STRING" },
+                  action: { type: "STRING" },
+                  description: { type: "STRING" }
+                },
+                required: ["main_product", "supporting_products", "visual_focus", "action", "description"]
+              },
+              strategy: {
+                type: "OBJECT",
+                properties: {
+                  content_objective: { type: "STRING" },
+                  visual_direction: { type: "STRING" },
+                  reason: { type: "STRING" }
+                },
+                required: ["content_objective", "visual_direction", "reason"]
+              }
+            },
+            required: ["content_type", "subject_type", "subject", "strategy"]
+          }
+        }
+      };
+
+      const response = await fetchWithRetry(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) throw new Error(`AI Subject Strategist HTTP ${response.status}`);
+
+      const result = await response.json();
+      const responseText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!responseText) throw new Error("AI Subject Strategist returned an empty response.");
+
+      const generated = JSON.parse(responseText);
+      if (generated.content_type !== input.content_type || generated.subject_type !== input.subject_type) {
+        throw new Error("AI Subject Strategist returned category IDs that do not match the selected references.");
+      }
+      if (!generated.subject?.description?.trim()) {
+        throw new Error("AI Subject Strategist did not return a valid subject description.");
+      }
+      return generated;
     }
 
     /**
@@ -965,23 +1067,41 @@ STRICT RULES:
         if (!text) throw new Error("Empty response from AI Prompt Engine");
 
         const refined = JSON.parse(text);
-        if (contentTypes.includes(refined.content_type)) els.contentTypeSelect.value = refined.content_type;
-        if (subjectTypes.some(item => item.id === refined.subject_type)) els.subjectTypeSelect.value = refined.subject_type;
+        const selectedContentType = contentTypes.includes(refined.content_type) ? refined.content_type : values.content_type;
+        const selectedSubjectType = subjectTypes.find(item => item.id === refined.subject_type) || values.subject_type;
+        const refinedFeatures = Array.isArray(refined.features) && refined.features.length === 3
+          ? refined.features
+          : values.features;
+
+        // Run the dedicated subject strategist after AI Refine has selected the final categories.
+        const strategistResult = await generateSubjectWithStrategist({
+          content_type: selectedContentType,
+          subject_type: selectedSubjectType,
+          product_name: refined.subject || values.subject,
+          product_context: values.subject,
+          headline: refined.headline || values.headline,
+          subheadline: refined.subheadline || values.subheadline,
+          features: refinedFeatures,
+          campaign_objective: refined.headline || values.headline || selectedContentType
+        }, apiKey, apiUrl);
+
+        els.contentTypeSelect.value = selectedContentType;
+        els.subjectTypeSelect.value = selectedSubjectType.id;
         updateSubjectTypeDescription();
-        if (refined.subject) els.subject.value = refined.subject;
+        els.subject.value = strategistResult.subject.description;
         if (refined.headline) els.headline.value = refined.headline;
         if (refined.subheadline) els.subheadline.value = refined.subheadline;
-        if (Array.isArray(refined.features) && refined.features.length === 3) {
-          els.f1Title.value = refined.features[0].title;
-          els.f1Desc.value = refined.features[0].description;
-          els.f2Title.value = refined.features[1].title;
-          els.f2Desc.value = refined.features[1].description;
-          els.f3Title.value = refined.features[2].title;
-          els.f3Desc.value = refined.features[2].description;
+        if (Array.isArray(refinedFeatures) && refinedFeatures.length === 3) {
+          els.f1Title.value = refinedFeatures[0].title;
+          els.f1Desc.value = refinedFeatures[0].description;
+          els.f2Title.value = refinedFeatures[1].title;
+          els.f2Desc.value = refinedFeatures[1].description;
+          els.f3Title.value = refinedFeatures[2].title;
+          els.f3Desc.value = refinedFeatures[2].description;
         }
 
         updatePromptPreview();
-        showToast("Variabel berhasil dioptimalkan sesuai standar Apple Art Direction.", "success");
+        showToast("Variabel berhasil diperbarui oleh AI Refine dan AI Subject Strategist.", "success");
       } catch (err) {
         showToast("Optimasi AI tidak tersedia saat ini. Input asli Anda tetap dipertahankan.", "error");
       } finally {
@@ -1307,7 +1427,7 @@ STRICT RULES:
     window.addEventListener("DOMContentLoaded", async () => {
       initEventListeners();
       try {
-        await Promise.all([loadContentTypes(), loadSubjectTypes()]);
+        await Promise.all([loadContentTypes(), loadSubjectTypes(), loadSubjectStrategist()]);
         resetFormToDefault(false);
       } catch (error) {
         console.error("Reference JSON loading failed:", error);
@@ -1317,7 +1437,7 @@ STRICT RULES:
           els.subjectTypeDescription.textContent = "Gagal memuat subject_types.json. Periksa koneksi lalu refresh halaman.";
         }
         resetFormToDefault(false);
-        showToast("Gagal memuat content_type.json atau subject_types.json.", "error");
+        showToast("Gagal memuat reference JSON atau ai-subject-strategist.md.", "error");
       }
     });
   </script>
