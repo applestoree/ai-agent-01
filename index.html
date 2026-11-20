@@ -282,17 +282,7 @@
                   <option value="Soft Grey Premium">Soft Grey Premium</option>
                   <option value="Minimalist Studio">Minimalist Studio</option>
                   <option value="Luxury Gradient">Luxury Gradient</option>
-                  <option value="Custom Background">Custom Background</option>
                 </select>
-                <!-- Conditional Custom Background Input -->
-                <div id="customBackgroundWrapper" class="hidden mt-2.5">
-                  <input
-                    type="text"
-                    id="customBackgroundInput"
-                    placeholder="Deskripsikan custom background (mis. Warm travertine stone podium with soft architectural sunlight)"
-                    class="apple-input w-full rounded-xl border border-[#D2D2D7] bg-white px-3.5 py-2.5 text-sm text-[#1D1D1F] placeholder-[#86868B]/70"
-                  />
-                </div>
               </div>
 
               <!-- COMPOSITION -->
@@ -317,28 +307,29 @@
               </div>
             </div>
 
-            <!-- RENDER CONTROLS: QUALITY -->
+            <!-- ACTION, LIGHTING & QUALITY -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <!-- QUALITY -->
               <div>
                 <div class="flex items-center justify-between mb-1.5">
-                  <label for="qualitySelect" class="block text-xs font-semibold uppercase tracking-wider text-[#1D1D1F]">
-                    Quality
-                  </label>
+                  <label for="actionInput" class="block text-xs font-semibold uppercase tracking-wider text-[#1D1D1F]">Action</label>
+                  <span class="text-[11px] font-mono text-[#86868B]">{{action}}</span>
+                </div>
+                <input type="text" id="actionInput" placeholder="Deskripsikan aksi atau pose produk" class="apple-input w-full rounded-2xl border border-[#D2D2D7] bg-[#FBFBFD] px-4 py-3 text-sm text-[#1D1D1F]" />
+              </div>
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label for="lightingInput" class="block text-xs font-semibold uppercase tracking-wider text-[#1D1D1F]">Lighting</label>
+                  <span class="text-[11px] font-mono text-[#86868B]">{{lighting}}</span>
+                </div>
+                <input type="text" id="lightingInput" placeholder="Deskripsikan pencahayaan visual" class="apple-input w-full rounded-2xl border border-[#D2D2D7] bg-[#FBFBFD] px-4 py-3 text-sm text-[#1D1D1F]" />
+              </div>
+              <div class="sm:col-span-2">
+                <div class="flex items-center justify-between mb-1.5">
+                  <label for="qualityInput" class="block text-xs font-semibold uppercase tracking-wider text-[#1D1D1F]">Quality</label>
                   <span class="text-[11px] font-mono text-[#86868B]">{{quality}}</span>
                 </div>
-                <select
-                  id="qualitySelect"
-                  class="apple-input w-full rounded-2xl border border-[#D2D2D7] bg-[#FBFBFD] px-4 py-3 text-sm text-[#1D1D1F]"
-                >
-                  <option value="Premium Commercial Photography" selected>Premium Commercial Photography</option>
-                  <option value="Ultra Photorealistic">Ultra Photorealistic</option>
-                  <option value="Luxury Advertising">Luxury Advertising</option>
-                  <option value="Professional Studio Photography">Professional Studio Photography</option>
-                  <option value="High-End Product Rendering">High-End Product Rendering</option>
-                </select>
+                <textarea id="qualityInput" rows="2" class="apple-input w-full rounded-2xl border border-[#D2D2D7] bg-[#FBFBFD] px-4 py-3 text-sm text-[#1D1D1F]"></textarea>
               </div>
-
             </div>
 
             <!-- PRIMARY ACTION BAR -->
@@ -566,9 +557,10 @@
         { title: "Camera Control", description: "Instant tactile access to pro camera tools." }
       ],
       background: "Clean White Premium",
-      customBackground: "",
       composition: "Center Hero — produk berada di tengah.",
-      quality: "Premium Commercial Photography"
+      action: "",
+      lighting: "",
+      quality: "Ultra-realistic, photorealistic, 8K resolution, sharp details."
     };
 
     // Fixed image output ratio: 4:5 portrait only
@@ -593,10 +585,10 @@
       f3Title: document.getElementById("feature3Title"),
       f3Desc: document.getElementById("feature3Desc"),
       backgroundSelect: document.getElementById("backgroundSelect"),
-      customBgWrapper: document.getElementById("customBackgroundWrapper"),
-      customBgInput: document.getElementById("customBackgroundInput"),
       compositionSelect: document.getElementById("compositionSelect"),
-      qualitySelect: document.getElementById("qualitySelect"),
+      actionInput: document.getElementById("actionInput"),
+      lightingInput: document.getElementById("lightingInput"),
+      qualityInput: document.getElementById("qualityInput"),
       finalPromptOutput: document.getElementById("finalPromptOutput"),
       generateBtn: document.getElementById("generateImageBtn"),
       generateBtnText: document.getElementById("generateBtnText"),
@@ -656,11 +648,6 @@
      * Read current values from form inputs
      */
     function getFormValues() {
-      const bgChoice = els.backgroundSelect.value;
-      const resolvedBackground = bgChoice === "Custom Background"
-        ? (els.customBgInput.value.trim() || "Custom Background")
-        : bgChoice;
-
       return {
         subject: els.subject.value.trim(),
         headline: els.headline.value.trim(),
@@ -670,9 +657,11 @@
           { title: els.f2Title.value.trim(), description: els.f2Desc.value.trim() },
           { title: els.f3Title.value.trim(), description: els.f3Desc.value.trim() }
         ],
-        background: resolvedBackground,
+        background: els.backgroundSelect.value,
         composition: els.compositionSelect.value,
-        quality: els.qualitySelect.value
+        action: els.actionInput.value.trim(),
+        lighting: els.lightingInput.value.trim(),
+        quality: els.qualityInput.value.trim()
       };
     }
 
@@ -704,6 +693,10 @@ Use a clean, premium Apple-inspired background with subtle depth, refined lighti
 COMPOSITION
 ${values.composition}
 Arrange the product and text elements into a balanced advertising composition. Ensure the product remains the primary focal point.
+ACTION
+${values.action || "[Action]"}
+LIGHTING
+${values.lighting || "[Lighting]"}
 BRAND IDENTITY
 Apple The Exchange TRX — Malaysia.
 Maintain a premium Apple retail advertising aesthetic. Do not invent additional logos or brand marks.
@@ -749,9 +742,6 @@ Generate one polished, high-end commercial advertising image. Maintain visual co
             focusEl
           };
         }
-      }
-      if (els.backgroundSelect.value === "Custom Background" && !els.customBgInput.value.trim()) {
-        return { valid: false, message: "Mohon isi deskripsi Custom Background.", focusEl: els.customBgInput };
       }
       return { valid: true };
     }
@@ -1084,11 +1074,10 @@ STRICT RULES:
       els.f3Desc.value = DEFAULT_STATE.features[2].description;
 
       els.backgroundSelect.value = DEFAULT_STATE.background;
-      els.customBgInput.value = DEFAULT_STATE.customBackground;
-      els.customBgWrapper.classList.add("hidden");
-
       els.compositionSelect.value = DEFAULT_STATE.composition;
-      els.qualitySelect.value = DEFAULT_STATE.quality;
+      els.actionInput.value = DEFAULT_STATE.action;
+      els.lightingInput.value = DEFAULT_STATE.lighting;
+      els.qualityInput.value = DEFAULT_STATE.quality;
 
       lastGeneratedPrompt = "";
       lastGeneratedRatio = IMAGE_RATIO;
@@ -1112,8 +1101,8 @@ STRICT RULES:
       const liveInputs = [
         els.subject, els.headline, els.subheadline,
         els.f1Title, els.f1Desc, els.f2Title, els.f2Desc, els.f3Title, els.f3Desc,
-        els.backgroundSelect, els.customBgInput,
-        els.compositionSelect, els.qualitySelect
+        els.backgroundSelect, els.compositionSelect,
+        els.actionInput, els.lightingInput, els.qualityInput
       ];
 
       liveInputs.forEach(input => {
@@ -1126,17 +1115,6 @@ STRICT RULES:
           lastGeneratedPrompt = "";
           updatePromptPreview();
         });
-      });
-
-      // Toggle Custom Background field visibility
-      els.backgroundSelect.addEventListener("change", () => {
-        if (els.backgroundSelect.value === "Custom Background") {
-          els.customBgWrapper.classList.remove("hidden");
-          els.customBgInput.focus();
-        } else {
-          els.customBgWrapper.classList.add("hidden");
-        }
-        updatePromptPreview();
       });
 
       // Main Form Submit -> Generate Image
